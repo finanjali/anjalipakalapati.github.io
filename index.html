@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anjali Pakalapati | Equity Research & Finance</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #f5f0e8;
+      --ink: #1a1a1a;
+      --muted: #6b6b6b;
+      --accent: #2c4a2e;
+      --rule: #d4cfc4;
+      --card-bg: #fff;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(245,240,232,0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--rule);
+      padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 60px;
+    }
+    .nav-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.1rem;
+      letter-spacing: 0.02em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--ink); }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      padding: 80px 6rem 4rem;
+      gap: 4rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    .hero-left h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2.8rem, 5vw, 4.5rem);
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+    }
+    .hero-left h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+    .hero-subtitle {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+    .hero-bio {
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 480px;
+      margin-bottom: 2rem;
+      line-height: 1.8;
+    }
+    .hero-cta {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-block;
+      padding: 0.7rem 1.6rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 1.5px solid var(--ink);
+      color: var(--ink);
+      transition: all 0.2s;
+    }
+    .btn:hover { background: var(--ink); color: var(--cream); }
+    .btn-filled { background: var(--ink); color: var(--cream); }
+    .btn-filled:hover { background: var(--accent); border-color: var(--accent); }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--rule);
+      padding: 1.5rem;
+    }
+    .stat-num {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.2rem;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 0.3rem;
+    }
+    .stat-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* SECTIONS */
+    section {
+      padding: 5rem 6rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    .section-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--accent);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      line-height: 1.15;
+      margin-bottom: 2.5rem;
+    }
+
+    /* ABOUT */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+    .about-text p {
+      color: var(--muted);
+      line-height: 1.9;
+      margin-bottom: 1rem;
+      font-size: 1.02rem;
+    }
+    .about-details { }
+    .detail-item {
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .detail-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .detail-val {
+      font-size: 0.95rem;
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    /* WORK SAMPLES */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--rule);
+      padding: 2rem;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,0.07); }
+    .card-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.8rem;
+    }
+    .card h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.2rem;
+      margin-bottom: 0.6rem;
+      line-height: 1.3;
+    }
+    .card p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    /* SKILLS */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2rem;
+    }
+    .skill-group h4 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    .skill-tag {
+      display: inline-block;
+      padding: 0.3rem 0.7rem;
+      border: 1px solid var(--rule);
+      font-size: 0.82rem;
+      margin: 0.3rem 0.3rem 0 0;
+      color: var(--ink);
+      background: var(--cream);
+    }
+
+    /* EXPERIENCE */
+    .exp-list { max-width: 780px; }
+    .exp-item {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 2rem;
+      padding: 2rem 0;
+      border-bottom: 1px solid var(--rule);
+    }
+    .exp-item:first-child { padding-top: 0; }
+    .exp-date {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      padding-top: 0.2rem;
+    }
+    .exp-content h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.15rem;
+      margin-bottom: 0.2rem;
+    }
+    .exp-company {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      margin-bottom: 0.7rem;
+    }
+    .exp-content ul {
+      padding-left: 1.1rem;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.8;
+    }
+
+    /* CONTACT */
+    .contact-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+    .contact-info p {
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 1.5rem;
+    }
+    .contact-links { display: flex; flex-direction: column; gap: 0.8rem; }
+    .contact-link {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--ink);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    .contact-link:hover { color: var(--accent); }
+
+    form { display: flex; flex-direction: column; gap: 1rem; }
+    form input, form textarea {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      background: var(--card-bg);
+      border: 1px solid var(--rule);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.92rem;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    form input:focus, form textarea:focus { border-color: var(--ink); }
+    form textarea { resize: vertical; min-height: 130px; }
+    form button {
+      align-self: flex-start;
+      padding: 0.75rem 1.8rem;
+      background: var(--ink);
+      color: var(--cream);
+      border: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    form button:hover { background: var(--accent); }
+
+    /* FOOTER */
+    footer {
+      padding: 2rem 6rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    footer p {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; padding: 80px 2rem 3rem; }
+      section { padding: 3.5rem 2rem; }
+      .about-grid, .contact-inner { grid-template-columns: 1fr; gap: 2rem; }
+      .exp-item { grid-template-columns: 1fr; gap: 0.3rem; }
+      footer { padding: 1.5rem 2rem; flex-direction: column; gap: 0.5rem; text-align: center; }
+      nav { padding: 0 1rem; }
+      .nav-links { gap: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">AP</a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#work">Work</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-left">
+      <p class="hero-subtitle">Equity Research · Financial Analysis</p>
+      <h1>Anjali<br /><em>Pakalapati</em></h1>
+      <p class="hero-bio">
+        Finance professional with hands-on experience in equity research, financial modeling, and data-driven analysis. Former Morgan Stanley analyst with a track record of delivering actionable insights across high-volume portfolios.
+      </p>
+      <div class="hero-cta">
+        <a href="#work" class="btn btn-filled">View Work</a>
+        <a href="#contact" class="btn">Get In Touch</a>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-card">
+        <div class="stat-num">$10M+</div>
+        <div class="stat-label">Monthly Volume Managed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">80%</div>
+        <div class="stat-label">Reduction in Data Exceptions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">2+</div>
+        <div class="stat-label">Years at Morgan Stanley</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">3.85</div>
+        <div class="stat-label">GPA · Finance Major</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <p class="section-tag">// 01 — About</p>
+    <h2 class="section-title">Analytical mind,<br /><em style="font-style:italic; font-family:'DM Serif Display',serif;">market-focused</em></h2>
+    <div class="about-grid">
+      <div class="about-text">
+        <p>
+          I'm a finance professional with a passion for equity research and quantitative analysis. My background spans operations at Morgan Stanley, student-run investment fund management, and academic research in financial econometrics.
+        </p>
+        <p>
+          I thrive at the intersection of data and decision-making -- building models that cut through noise and surface the signals that matter. Whether it's analyzing a balance sheet or automating a reconciliation workflow, I bring rigor and curiosity to every problem.
+        </p>
+        <p>
+          Currently seeking full-time roles in equity research, investment banking, or financial analysis where I can apply my modeling skills and market intuition.
+        </p>
+      </div>
+      <div class="about-details">
+        <div class="detail-item">
+          <span class="detail-label">Education</span>
+          <span class="detail-val">University of Portland</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Major</span>
+          <span class="detail-val">Finance</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">GPA</span>
+          <span class="detail-val">3.85</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Location</span>
+          <span class="detail-val">Portland, OR</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Email</span>
+          <span class="detail-val">anjalipakalapati@gmail.com</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORK SAMPLES -->
+  <section id="work">
+    <p class="section-tag">// 02 — Work Samples</p>
+    <h2 class="section-title">Research &<br /><em style="font-style:italic; font-family:'DM Serif Display',serif;">Analysis</em></h2>
+    <div class="cards-grid">
+      <a href="#" class="card">
+        <p class="card-tag">Equity Research</p>
+        <h3>Redhawk Fund Stock Analysis</h3>
+        <p>Buy/sell recommendations with DCF and comparable company analysis for the student-managed Redhawk Investment Fund portfolio.</p>
+      </a>
+      <a href="#" class="card">
+        <p class="card-tag">Financial Modeling</p>
+        <h3>Morgan Stanley Reconciliation Automation</h3>
+        <p>Designed workflow automation that reduced data exceptions by 80% and improved reconciliation accuracy across $10M+ monthly volume.</p>
+      </a>
+      <a href="#" class="card">
+        <p class="card-tag">Econometrics</p>
+        <h3>Financial Research Paper</h3>
+        <p>Academic research applying regression analysis and statistical modeling to examine relationships between macroeconomic variables and equity returns.</p>
+      </a>
+      <a href="#" class="card">
+        <p class="card-tag">Data Analysis</p>
+        <h3>Portfolio Performance Dashboard</h3>
+        <p>Built analytics dashboards tracking portfolio metrics, sector allocations, and performance attribution for the Redhawk Fund.</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <p class="section-tag">// 03 — Skills</p>
+    <h2 class="section-title">Tools &<br /><em style="font-style:italic; font-family:'DM Serif Display',serif;">Competencies</em></h2>
+    <div class="skills-grid">
+      <div class="skill-group">
+        <h4>Finance</h4>
+        <span class="skill-tag">DCF Modeling</span>
+        <span class="skill-tag">Equity Valuation</span>
+        <span class="skill-tag">Comparable Analysis</span>
+        <span class="skill-tag">Financial Statement Analysis</span>
+        <span class="skill-tag">Portfolio Management</span>
+        <span class="skill-tag">Reconciliation</span>
+      </div>
+      <div class="skill-group">
+        <h4>Technical</h4>
+        <span class="skill-tag">Excel / VBA</span>
+        <span class="skill-tag">Bloomberg Terminal</span>
+        <span class="skill-tag">Python</span>
+        <span class="skill-tag">SQL</span>
+        <span class="skill-tag">Power BI</span>
+        <span class="skill-tag">Tableau</span>
+      </div>
+      <div class="skill-group">
+        <h4>Research</h4>
+        <span class="skill-tag">Regression Analysis</span>
+        <span class="skill-tag">Econometrics</span>
+        <span class="skill-tag">Sector Research</span>
+        <span class="skill-tag">Due Diligence</span>
+        <span class="skill-tag">Investment Memos</span>
+      </div>
+      <div class="skill-group">
+        <h4>Soft Skills</h4>
+        <span class="skill-tag">Stakeholder Communication</span>
+        <span class="skill-tag">Cross-functional Collaboration</span>
+        <span class="skill-tag">Presentation</span>
+        <span class="skill-tag">Detail-Oriented</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section id="experience">
+    <p class="section-tag">// 04 — Experience</p>
+    <h2 class="section-title">Career<br /><em style="font-style:italic; font-family:'DM Serif Display',serif;">Timeline</em></h2>
+    <div class="exp-list">
+
+      <div class="exp-item">
+        <div class="exp-date">2022 — 2024</div>
+        <div class="exp-content">
+          <h3>Operations Analyst</h3>
+          <p class="exp-company">Morgan Stanley</p>
+          <ul>
+            <li>Managed reconciliation workflows across $10M+ in monthly transaction volume</li>
+            <li>Reduced data exceptions by 80% through process automation and workflow redesign</li>
+            <li>Collaborated cross-functionally with trading desks and compliance teams</li>
+            <li>Produced daily reporting packages for senior operations leadership</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="exp-item">
+        <div class="exp-date">2021 — 2023</div>
+        <div class="exp-content">
+          <h3>Analyst, Redhawk Investment Fund</h3>
+          <p class="exp-company">University of Portland</p>
+          <ul>
+            <li>Conducted buy/sell equity research on assigned sectors using DCF and comps</li>
+            <li>Presented investment theses to fund committee with supporting financial models</li>
+            <li>Tracked portfolio performance and maintained sector allocation dashboards</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="exp-item">
+        <div class="exp-date">2019 — 2023</div>
+        <div class="exp-content">
+          <h3>B.S. Finance</h3>
+          <p class="exp-company">University of Portland (formerly Jain University)</p>
+          <ul>
+            <li>GPA: 3.85 — Dean's List</li>
+            <li>Relevant coursework: Financial Modeling, Econometrics, Corporate Finance, Investments</li>
+            <li>Completed independent research in financial econometrics</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <p class="section-tag">// 05 — Contact</p>
+    <h2 class="section-title">Let's<br /><em style="font-style:italic; font-family:'DM Serif Display',serif;">Connect</em></h2>
+    <div class="contact-inner">
+      <div class="contact-info">
+        <p>
+          I'm actively looking for opportunities in equity research, investment banking, and financial analysis. If you have an open role, a project, or just want to talk markets -- reach out.
+        </p>
+        <div class="contact-links">
+          <a href="mailto:anjalipakalapati@gmail.com" class="contact-link">
+            <span>✉</span> anjalipakalapati@gmail.com
+          </a>
+          <a href="https://linkedin.com/in/anjalipakalapati" target="_blank" class="contact-link">
+            <span>in</span> linkedin.com/in/anjalipakalapati
+          </a>
+        </div>
+      </div>
+      <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+        <input type="text" name="name" placeholder="Your Name" required />
+        <input type="email" name="email" placeholder="Your Email" required />
+        <textarea name="message" placeholder="Your Message" required></textarea>
+        <button type="submit">Send Message</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 Anjali Pakalapati</p>
+    <p>Built with care · anjalipakalapati.github.io</p>
+  </footer>
+
+</body>
+</html>
