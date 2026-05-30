@@ -199,8 +199,6 @@ footer { text-align: center; font-size: 0.76rem; color: #aaa; padding: 20px; }
     <label>Segment:</label>
     <select id="filter-segment">
       <option value="all">All Segments</option>
-      <option value="Safety-Critical">Safety-Critical Systems</option>
-      <option value="Interiors">Interiors, Seating, Trim &amp; Glazing</option>
     </select>
     <label>Risk Level:</label>
     <select id="filter-risk">
@@ -473,6 +471,18 @@ function sortTable(key) {
   applyFilters();
 }
 
+function populateSegmentDropdown() {
+  const sel = document.getElementById("filter-segment");
+  const cur = sel.value;
+  sel.innerHTML = '<option value="all">All Segments</option>';
+  const segments = [...new Set(suppliers.map(s => s.segment).filter(Boolean))].sort();
+  segments.forEach(seg => {
+    const o = document.createElement("option");
+    o.value = seg; o.textContent = seg; sel.appendChild(o);
+  });
+  sel.value = (cur !== "all" && segments.includes(cur)) ? cur : "all";
+}
+
 function populateSupplierDropdown() {
   const sel = document.getElementById("filter-supplier");
   const cur = sel.value;
@@ -596,6 +606,7 @@ document.getElementById("xlsxUpload").addEventListener("change", function(e) {
 
       suppliers = parsed;
       filtered = [...suppliers];
+      populateSegmentDropdown();
       populateSupplierDropdown();
       applyFilters();
       status.className = "upload-status";
@@ -614,6 +625,7 @@ document.getElementById("filter-risk").addEventListener("change", applyFilters);
 document.getElementById("filter-supplier").addEventListener("change", applyFilters);
 
 // Init
+populateSegmentDropdown();
 populateSupplierDropdown();
 applyFilters();
 </script>
