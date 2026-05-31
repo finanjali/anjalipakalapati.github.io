@@ -6,6 +6,8 @@
 <title>PACCAR Supplier Sustainability Risk Platform</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -113,6 +115,19 @@ a{color:var(--navy-light);text-decoration:none}
 .info-block{background:var(--surface);border-radius:8px;padding:12px 14px;font-size:12px;line-height:1.6;color:var(--text);margin-bottom:8px;border:1px solid var(--border)}
 .info-block.action-block{background:var(--navy);border:none;color:#fff}
 .section-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin:14px 0 6px}
+.report-modal{background:var(--card);border-radius:12px;padding:24px;width:760px;max-height:88vh;overflow-y:auto;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,35,102,0.2)}
+.signal-row{display:grid;grid-template-columns:160px 1fr 80px;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+.signal-row:last-child{border:none}
+.signal-label{font-weight:700;color:var(--navy);font-size:11px}
+.signal-found{font-size:11px;color:var(--muted);line-height:1.4}
+.score-input{width:60px;padding:5px 8px;border-radius:6px;border:1px solid var(--border);font-size:13px;font-weight:700;text-align:center;color:var(--navy)}
+.score-input:focus{outline:2px solid var(--navy)}
+.signal-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;margin-right:4px}
+.sig-found{background:var(--green-bg);color:var(--green)}
+.sig-inferred{background:var(--amber-bg);color:var(--amber)}
+.sig-missing{background:#f3f4f6;color:#9ca3af}
+.progress-bar{height:6px;background:#e8ecf4;border-radius:3px;overflow:hidden;margin:8px 0}
+.progress-fill{height:100%;background:var(--navy);border-radius:3px;transition:width 0.3s}
 </style>
 </head>
 <body>
@@ -131,6 +146,10 @@ a{color:var(--navy-light);text-decoration:none}
     <label class="btn" style="cursor:pointer">
       Import Excel
       <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" onchange="loadExcel(event)">
+    </label>
+    <label class="btn btn-blue" style="cursor:pointer">
+      📄 Upload Report
+      <input type="file" id="reportInput" accept=".pdf,.docx,.doc" style="display:none" onchange="loadReport(event)">
     </label>
     <div class="upload-status" id="uploadStatus"></div>
   </div>
@@ -204,6 +223,60 @@ a{color:var(--navy-light);text-decoration:none}
 </div>
 
 <div class="footer">PACCAR Supplier Sustainability Risk Platform · Team Hopper · Seattle University · 2026 · Scale 1–10 (higher = more risk)</div>
+
+<!-- Report Upload Modal -->
+<div class="modal-overlay" id="reportModal">
+  <div class="report-modal">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+      <div>
+        <h2 style="font-size:16px;color:var(--navy);font-weight:800;margin:0" id="reportModalTitle">Analysing Report...</h2>
+        <p style="font-size:11px;color:var(--muted);margin-top:4px" id="reportModalSub"></p>
+      </div>
+      <button class="btn btn-sm" onclick="closeReportModal()">✕ Close</button>
+    </div>
+
+    <!-- Progress -->
+    <div id="reportProgress" style="margin-bottom:16px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px" id="reportProgressText">Extracting text...</div>
+      <div class="progress-bar"><div class="progress-fill" id="reportProgressBar" style="width:0%"></div></div>
+    </div>
+
+    <!-- Supplier name input -->
+    <div id="reportSupplierInput" style="display:none;margin-bottom:16px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">Supplier Name</label>
+          <input type="text" id="reportSupplierName" placeholder="e.g. Bosch Robert" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:13px;color:var(--navy)">
+          <p style="font-size:10px;color:var(--muted);margin-top:3px">Detected: <span id="detectedName" style="color:var(--navy);font-weight:600"></span></p>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">Sector</label>
+          <select id="reportSector" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:13px;color:var(--navy)"></select>
+        </div>
+      </div>
+
+      <div style="background:var(--surface);border-radius:8px;padding:12px 14px;margin-bottom:14px;border:1px solid var(--border)">
+        <div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:6px">📋 What we found in the report</div>
+        <div id="reportSignals"></div>
+      </div>
+
+      <div style="margin-bottom:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:10px">Suggested Scores — review and adjust before saving (1 = low risk, 10 = high risk)</div>
+        <div id="reportScoreGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"></div>
+      </div>
+
+      <div style="margin-bottom:14px">
+        <label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">Key Risk Summary (one line)</label>
+        <input type="text" id="reportKeyRisk" placeholder="e.g. No SBTi commitment, CDP B only" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:12px;color:var(--navy)">
+      </div>
+
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn" onclick="closeReportModal()">Cancel</button>
+        <button class="btn btn-blue" onclick="saveReportSupplier()">Save to Dashboard</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Supplier Detail Modal -->
 <div class="modal-overlay" id="detailModal">
@@ -622,6 +695,203 @@ function loadExcel(e) {
   };
   reader.readAsArrayBuffer(file);
 }
+
+/* ════════════════════════════════════════════
+   REPORT UPLOAD — PDF / DOCX PARSER
+   ════════════════════════════════════════════ */
+const SIGNALS = [
+  {criterion:0,label:"ESG Disclosure",patterns:[
+    {re:/cdp\s+(a\b|a-)/i,score:2,hint:"CDP A/A- found"},
+    {re:/cdp\s+b/i,score:3,hint:"CDP B found"},
+    {re:/cdp\s+(c|d)/i,score:5,hint:"CDP C/D found"},
+    {re:/sbti.*valid|science.based.*valid/i,score:2,hint:"SBTi Validated"},
+    {re:/sbti.*commit/i,score:3,hint:"SBTi Committed"},
+    {re:/msci.*aa/i,score:2,hint:"MSCI AA"},
+    {re:/msci.*bbb/i,score:3,hint:"MSCI BBB"},
+    {re:/no.*sustainability.*report|no.*esg.*report/i,score:7,hint:"No sustainability report"},
+    {re:/sustainability report|esg report|annual report/i,score:3,hint:"Report published"}
+  ]},
+  {criterion:1,label:"Human Rights",patterns:[
+    {re:/fatal|fatality|worker.*death/i,score:8,hint:"Fatality on record"},
+    {re:/forced.labor|child.labor|modern.slavery/i,score:8,hint:"Forced/child labor"},
+    {re:/osha.*willful/i,score:7,hint:"OSHA willful violation"},
+    {re:/osha.*\$[5-9]\d{4}|\$[1-9]\d{5}.*osha/i,score:6,hint:"OSHA penalty $50K+"},
+    {re:/osha.*penalty|osha.*citation/i,score:4,hint:"OSHA penalty found"},
+    {re:/no.*osha|zero.*osha/i,score:2,hint:"No OSHA findings"},
+    {re:/living wage|human rights policy/i,score:2,hint:"HR commitments found"}
+  ]},
+  {criterion:2,label:"Hazardous Waste",patterns:[
+    {re:/superfund|cercla/i,score:9,hint:"Superfund site"},
+    {re:/pfas|forever.chemical/i,score:8,hint:"PFAS chemicals"},
+    {re:/rcra.*violation|hazardous waste.*penalty/i,score:6,hint:"RCRA violation"},
+    {re:/epa.*penalty|epa.*fine/i,score:5,hint:"EPA penalty"},
+    {re:/iso.14001|zero.*waste|closed.loop/i,score:2,hint:"Strong waste management"},
+    {re:/voc|solvent|chemical.*emission/i,score:5,hint:"VOC/chemical emissions"}
+  ]},
+  {criterion:3,label:"Energy Supply",patterns:[
+    {re:/100%.*renewable|re100/i,score:1,hint:"100% renewable / RE100"},
+    {re:/50%.*renewable|renewable.*target/i,score:3,hint:"Renewable energy target"},
+    {re:/renewable energy|solar|wind power/i,score:3,hint:"Renewables mentioned"},
+    {re:/no.*energy.*target/i,score:7,hint:"No energy transition plan"},
+    {re:/energy.efficiency|energy.intensity/i,score:4,hint:"Energy efficiency programme"}
+  ]},
+  {criterion:4,label:"Conflict Minerals",patterns:[
+    {re:/cmrt.*publish|full.*traceability|rmap/i,score:2,hint:"Full 3TG traceability"},
+    {re:/cmrt|conflict.*mineral.*report/i,score:3,hint:"CMRT filed"},
+    {re:/3tg|tin.*tantalum.*tungsten/i,score:5,hint:"3TG exposure noted"},
+    {re:/no.*conflict.*mineral|no.*cmrt/i,score:6,hint:"No conflict minerals disclosure"},
+    {re:/semiconductor|cobalt|rare.earth/i,score:5,hint:"High 3TG exposure"}
+  ]},
+  {criterion:5,label:"CO2 Compliance",patterns:[
+    {re:/net.zero.*2050|carbon.neutral.*2050/i,score:2,hint:"Net zero 2050 target"},
+    {re:/sbti.*valid/i,score:2,hint:"SBTi Validated"},
+    {re:/clean.air.act.*penalty|\$.*caa/i,score:8,hint:"Clean Air Act penalty"},
+    {re:/defeat.device|emissions.*cheat/i,score:9,hint:"Emissions defeat device"},
+    {re:/scope.1.*scope.2.*reduc/i,score:3,hint:"Scope 1+2 targets"},
+    {re:/no.*carbon.*target/i,score:6,hint:"No carbon targets"},
+    {re:/carbon.*reduction|ghg.*target/i,score:3,hint:"GHG targets set"}
+  ]},
+  {criterion:6,label:"Defective Parts",patterns:[
+    {re:/data.*falsif|fraud.*quality/i,score:9,hint:"Quality fraud on record"},
+    {re:/nhtsa.*recall|major.*recall/i,score:7,hint:"Major NHTSA recalls"},
+    {re:/recall|defect.*notice/i,score:5,hint:"Recall history found"},
+    {re:/iatf.16949|iso.9001|zero.*defect/i,score:2,hint:"Quality certifications"},
+    {re:/ppm.*award|10.*ppm/i,score:2,hint:"Quality award / low PPM"}
+  ]},
+  {criterion:7,label:"Switch Cost",patterns:[
+    {re:/sole.source|sole supplier|single source/i,score:8,hint:"Sole source supplier"},
+    {re:/long.term.*agreement|lta/i,score:6,hint:"Long-term contract"},
+    {re:/qualified.*alternative|multiple.*supplier/i,score:3,hint:"Alternatives available"}
+  ]}
+];
+
+function setReportProgress(pct,text){
+  document.getElementById('reportProgressBar').style.width=pct+'%';
+  document.getElementById('reportProgressText').textContent=text;
+}
+
+async function extractTextFromPDF(arrayBuffer){
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const pdf=await pdfjsLib.getDocument({data:arrayBuffer}).promise;
+  let text='';
+  for(let i=1;i<=pdf.numPages;i++){
+    const page=await pdf.getPage(i);
+    const content=await page.getTextContent();
+    text+=content.items.map(item=>item.str).join(' ')+'\n';
+    setReportProgress(10+Math.round((i/pdf.numPages)*55),`Reading page ${i} of ${pdf.numPages}...`);
+  }
+  return text;
+}
+
+async function extractTextFromDOCX(arrayBuffer){
+  const result=await mammoth.extractRawText({arrayBuffer});
+  return result.value;
+}
+
+function detectSupplierName(text){
+  const patterns=[
+    /^([A-Z][A-Za-z\s&,\.]{3,40})\s+sustainability/im,
+    /([A-Z][A-Za-z\s&,\.]{3,40})\s+(?:annual|esg|corporate responsibility)/im
+  ];
+  for(const re of patterns){const m=text.match(re);if(m)return m[1].trim();}
+  return '';
+}
+
+function analyseText(text){
+  const suggestedScores=[5,5,5,5,5,5,5,5];
+  const results=SIGNALS.map(sig=>{
+    const found=[];
+    let bestScore=null;
+    sig.patterns.forEach(p=>{
+      if(p.re.test(text)){
+        found.push(p.hint);
+        if(bestScore===null)bestScore=p.score;
+      }
+    });
+    if(bestScore!==null)suggestedScores[sig.criterion]=bestScore;
+    return{label:sig.label,found,score:suggestedScores[sig.criterion]};
+  });
+  const sbti=/sbti.*valid|science.based.*valid/i.test(text)?'Validated':/sbti.*commit/i.test(text)?'Committed':'None';
+  const cdpM=text.match(/cdp\s+(a\b|a-|b\b|b-|c\b|d\b)/i);
+  const cdp=cdpM?cdpM[1].toUpperCase():'';
+  const vtM=text.match(/\$([\d,\.]+[MBK])[^a-z]{0,30}(?:penalty|fine|violation|settlement)/i);
+  const vt=vtM?vtM[0].substring(0,60):'';
+  return{suggestedScores,results,sbti,cdp,vt};
+}
+
+async function loadReport(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  document.getElementById('reportModal').classList.add('show');
+  document.getElementById('reportModalTitle').textContent='Analysing: '+file.name;
+  document.getElementById('reportModalSub').textContent='Extracting text from document...';
+  document.getElementById('reportSupplierInput').style.display='none';
+  document.getElementById('reportProgress').style.display='block';
+  document.getElementById('reportProgressBar').style.background='var(--navy)';
+  setReportProgress(5,'Reading file...');
+  try{
+    const arrayBuffer=await file.arrayBuffer();
+    let text='';
+    if(ext==='pdf'){setReportProgress(10,'Parsing PDF...');text=await extractTextFromPDF(arrayBuffer);}
+    else if(ext==='docx'||ext==='doc'){setReportProgress(30,'Parsing Word document...');text=await extractTextFromDOCX(arrayBuffer);setReportProgress(70,'Analysing content...');}
+    else throw new Error('Unsupported file type. Please upload PDF or DOCX.');
+    setReportProgress(85,'Scanning for sustainability signals...');
+    const{suggestedScores,results,sbti,cdp,vt}=analyseText(text);
+    const detectedName=detectSupplierName(text);
+    setReportProgress(100,'Analysis complete.');
+    document.getElementById('detectedName').textContent=detectedName||'Not detected';
+    document.getElementById('reportSupplierName').value=detectedName;
+    document.getElementById('reportModalSub').textContent=`Found signals in ${results.filter(r=>r.found.length>0).length} of 8 criteria`;
+    const sectorSel=document.getElementById('reportSector');
+    sectorSel.innerHTML=[...new Set(suppliers.map(s=>s.sector))].sort().map(s=>`<option>${s}</option>`).join('');
+    document.getElementById('reportSignals').innerHTML=results.map(r=>`
+      <div class="signal-row">
+        <div class="signal-label">${r.label}</div>
+        <div class="signal-found">${r.found.length?r.found.map(h=>`<span class="signal-badge sig-found">✓ ${h}</span>`).join(' '):'<span class="signal-badge sig-missing">No signal — default 5</span>'}</div>
+        <div style="font-size:10px;color:var(--muted)">→ <strong style="color:var(--navy)">${r.score}</strong></div>
+      </div>`).join('');
+    document.getElementById('reportScoreGrid').innerHTML=SIGNALS.map((sig,i)=>`
+      <div style="background:var(--surface);border-radius:8px;padding:10px;text-align:center;border:1px solid var(--border)">
+        <div style="font-size:9px;color:var(--muted);font-weight:700;margin-bottom:6px">${sig.label}</div>
+        <input class="score-input" type="number" id="rs${i}" min="1" max="10" value="${suggestedScores[i]}">
+      </div>`).join('');
+    document.getElementById('reportKeyRisk').value=[sbti!=='None'?'SBTi '+sbti:'No SBTi',cdp?'CDP '+cdp:'No CDP',vt].filter(Boolean).join(' · ');
+    window._reportMeta={sbti,vt,cdp};
+    setTimeout(()=>{document.getElementById('reportProgress').style.display='none';document.getElementById('reportSupplierInput').style.display='block';},600);
+  }catch(err){
+    setReportProgress(100,'❌ '+err.message);
+    document.getElementById('reportProgressBar').style.background='#c0170f';
+  }
+  e.target.value='';
+}
+
+function saveReportSupplier(){
+  const name=document.getElementById('reportSupplierName').value.trim();
+  const sector=document.getElementById('reportSector').value;
+  const keyRisk=document.getElementById('reportKeyRisk').value.trim();
+  if(!name){alert('Please enter a supplier name.');return;}
+  const scores=SIGNALS.map((_,i)=>{const v=parseInt(document.getElementById('rs'+i).value);return isNaN(v)?5:Math.min(10,Math.max(1,v));});
+  const w=WEIGHTS[sector]||DEFAULT_W;
+  const score=+(scores.reduce((a,v,i)=>a+v*w[i],0)).toFixed(2);
+  const risk=score<4?'LOW':score<6.5?'MODERATE':'HIGH';
+  const meta=window._reportMeta||{};
+  const entry={name,sector,scores,score,risk,sbti:meta.sbti||'',vt:meta.vt||'',flag:'',action:keyRisk};
+  const existing=suppliers.findIndex(s=>s.name.toLowerCase()===name.toLowerCase());
+  if(existing>=0)suppliers[existing]=entry;else suppliers.push(entry);
+  closeReportModal();
+  renderDashboard();
+  const status=document.getElementById('uploadStatus');
+  status.style.display='inline-block';status.className='upload-status';
+  status.textContent=`✅ ${name} ${existing>=0?'updated':'added'} from report`;
+}
+
+function closeReportModal(){
+  document.getElementById('reportModal').classList.remove('show');
+  document.getElementById('reportProgress').style.display='block';
+  setReportProgress(0,'Extracting text...');
+}
+document.getElementById('reportModal').addEventListener('click',e=>{if(e.target===document.getElementById('reportModal'))closeReportModal();});
 
 // Init
 renderDashboard();
