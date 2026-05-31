@@ -158,6 +158,7 @@ a{color:var(--navy-light);text-decoration:none}
 <div class="nav">
   <button class="nav-btn active" onclick="showPanel('dashboard',this)">Dashboard</button>
   <button class="nav-btn" onclick="showPanel('sectors',this)">Sectors</button>
+  <button class="nav-btn" onclick="showPanel('sectorintel',this)">Sector Intel</button>
   <button class="nav-btn" onclick="showPanel('heatmap',this)">Heatmap</button>
   <button class="nav-btn" onclick="showPanel('tiering',this)">Tiering</button>
   <button class="nav-btn" onclick="showPanel('anomalies',this)">Anomalies</button>
@@ -189,6 +190,12 @@ a{color:var(--navy-light);text-decoration:none}
   <div class="panel" id="p-sectors">
     <div class="filter-bar" id="sectorFilterBar"></div>
     <div id="sectorDetail"></div>
+  </div>
+
+  <!-- SECTOR INTEL -->
+  <div class="panel" id="p-sectorintel">
+    <div class="filter-bar" id="intelFilterBar"></div>
+    <div id="intelContent"></div>
   </div>
 
   <!-- HEATMAP -->
@@ -380,6 +387,7 @@ function showPanel(name, btn) {
   document.getElementById('breadcrumb').innerHTML='';
   if(name==='dashboard') renderDashboard();
   if(name==='heatmap') renderHeatmap('all');
+  if(name==='sectorintel') renderSectorIntel(getSectors()[0]);
   if(name==='tiering') renderTiering();
   if(name==='anomalies') renderAnomalies();
   if(name==='sectors') renderSectorList();
@@ -694,6 +702,256 @@ function loadExcel(e) {
     } catch(err) { status.className='upload-status error'; status.textContent='❌ '+err.message; }
   };
   reader.readAsArrayBuffer(file);
+}
+
+/* ════════════════════════════════════════════
+   SECTOR INTEL
+   ════════════════════════════════════════════ */
+
+const SECTOR_CONTEXT = {
+  "Safety-Critical": {
+    regulatory: [
+      "EU General Safety Regulation II (GSR II) — mandatory ADAS on all trucks from 2024",
+      "FMVSS / CMVSS — Federal Motor Vehicle Safety Standards for brake & coupling systems",
+      "UNECE R13 — heavy vehicle braking regulation",
+      "Scope 3 Category 1 — Tier 1 brake/ADAS suppliers are PACCAR's largest indirect emissions source"
+    ],
+    checklist: [
+      "Does the supplier have SBTi Validated or Committed targets?",
+      "Is brake/ADAS software OTA-updatable for EU GSR II compliance?",
+      "Any Clean Air Act or EPA enforcement history?",
+      "Conflict minerals (cobalt, rare earths) in ADAS semiconductors — CMRT published?",
+      "What is the switching timeline if this supplier fails? (Brakes = safety-critical lock-in)"
+    ]
+  },
+  "Interiors": {
+    regulatory: [
+      "EU End-of-Life Vehicles Directive (ELV) — 95% recyclability target by 2030",
+      "REACH Regulation — SVHCs in foam, adhesives, PVC plasticizers",
+      "VOC Emission Standards — interior cabin air quality requirements",
+      "EU CSDDD — mandatory supply chain due diligence from 2026"
+    ],
+    checklist: [
+      "Does the supplier publish VOC emission rates for foam and trim materials?",
+      "Is recycled content percentage documented for seats/headliner/glazing?",
+      "Any OSHA or EPA violations at US interior manufacturing plants?",
+      "REACH SVHC compliance documentation available?",
+      "Closed-loop or take-back programme for end-of-life materials?"
+    ]
+  },
+  "Tires": {
+    regulatory: [
+      "EU Deforestation Regulation (EUDR) — natural rubber traceability required by Dec 2025",
+      "UFLPA — Uyghur Forced Labor Prevention Act — SE Asia plantation supply chains at risk",
+      "CSRD / ESRS — mandatory sustainability reporting for large EU companies",
+      "TRWP (Tire and Road Wear Particles) — classified as financially material by Michelin 2024"
+    ],
+    checklist: [
+      "Does the supplier have an EUDR Due Diligence Statement (DDS) ready?",
+      "Is natural rubber GPS-traceable to plantation level?",
+      "GPSNR (Global Platform for Sustainable Natural Rubber) membership?",
+      "Any forced labor risk in SE Asia rubber supply chain?",
+      "SBTi target — tire manufacturing is energy-intensive and Scope 3-heavy"
+    ]
+  },
+  "Coatings": {
+    regulatory: [
+      "EPA TSCA Section 8(a)(7) — PFAS inventory reporting deadline Oct 2026",
+      "EU REACH PFAS Restriction — broad PFAS ban proposed across coatings sector",
+      "CAA Title V — major emitters (paint/coating facilities) require operating permits",
+      "OSHA 1910.94 — ventilation requirements for spray finishing operations"
+    ],
+    checklist: [
+      "Has the supplier completed an EPA TSCA PFAS inventory?",
+      "Any PFAS-containing products in the coating formulation?",
+      "Title V major source emitter status — any pending EPA deadlines?",
+      "OSHA inspection history at spray finishing / paint facilities?",
+      "Is a PFAS-free alternative product available or in development?"
+    ]
+  },
+  "Electronics, Wiring & Sensors": {
+    regulatory: [
+      "SEC Conflict Minerals Rule (Dodd-Frank 1502) — annual SD filing required",
+      "EU RoHS — restriction of hazardous substances in electronics",
+      "IATF 16949 — automotive quality management standard",
+      "Export controls — ITAR/EAR implications for ADAS sensor technology"
+    ],
+    checklist: [
+      "Is a full CMRT (Conflict Minerals Reporting Template) published annually?",
+      "3TG (tin, tantalum, tungsten, gold) smelter list — RMAP-certified?",
+      "RoHS compliance documentation for all components?",
+      "Any antitrust, price-fixing, or quality fraud history (e.g. Mitsubishi Electric)?",
+      "Wiring harness sole-source risk — what is the re-qualification timeline?"
+    ]
+  },
+  "Fluids, Filtration & Emissions": {
+    regulatory: [
+      "EPA Clean Air Act (CAA) — emissions aftertreatment compliance (SCR, DPF, EGR)",
+      "CARB (California Air Resources Board) — stricter NOx limits from 2024",
+      "EPA RCRA — hazardous waste management for used fluids and filter media",
+      "EU Stage V — off-road and heavy vehicle emissions standards"
+    ],
+    checklist: [
+      "Any Clean Air Act enforcement history or consent decrees?",
+      "CARB-compliant product line — tested and certified for CA market?",
+      "Hazardous waste management plan for filter media and used oil?",
+      "SBTi target — emission system manufacturers are in PACCAR's Scope 3",
+      "SCR/DPF product roadmap for BEV/FCEV transition (filtration still needed)?"
+    ]
+  }
+};
+
+let intelChartInstance = null;
+
+function renderSectorIntel(sector) {
+  const sectors = getSectors();
+
+  // Filter bar
+  document.getElementById('intelFilterBar').innerHTML = sectors.map(s =>
+    `<button class="f-btn${s===sector?' active':''}" onclick="renderSectorIntel('${s}')">${s}</button>`
+  ).join('');
+
+  const ss = suppliers.filter(s => s.sector === sector);
+  const ctx = SECTOR_CONTEXT[sector] || { regulatory: [], checklist: [] };
+
+  // Avg score per criterion for this sector
+  const avgScores = CRITERIA.map((_, i) =>
+    ss.length ? +(ss.reduce((a,s) => a + s.scores[i], 0) / ss.length).toFixed(1) : 0
+  );
+
+  // Top 5 criteria by avg score (highest risk first)
+  const ranked = avgScores
+    .map((avg, i) => ({ label: CRITERIA[i], short: SHORT[i], avg, idx: i }))
+    .sort((a, b) => b.avg - a.avg)
+    .slice(0, 5);
+
+  // Common flags — flags appearing in 2+ suppliers
+  const flagCounts = {};
+  ss.forEach(s => {
+    if (!s.flag) return;
+    const clean = s.flag.replace(/^[✅⚠🔴⛔🚨]\s*/,'').substring(0, 60);
+    const key = clean.split('—')[0].trim();
+    flagCounts[key] = (flagCounts[key] || 0) + 1;
+  });
+  const commonFlags = Object.entries(flagCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+
+  // Score distribution among suppliers
+  const low  = ss.filter(s => calcWA(s) < 4).length;
+  const mod  = ss.filter(s => calcWA(s) >= 4 && calcWA(s) < 6.5).length;
+  const high = ss.filter(s => calcWA(s) >= 6.5).length;
+  const avgSector = ss.length ? (ss.reduce((a,s) => a + calcWA(s), 0) / ss.length).toFixed(1) : '—';
+
+  document.getElementById('intelContent').innerHTML = `
+    <!-- Sector header -->
+    <div class="card" style="border-left:4px solid var(--navy);margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:16px;font-weight:800;color:var(--navy)">${sector}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px">${ss.length} suppliers scored · Portfolio avg: <strong style="color:${avgSector<4?'#1a7a3c':avgSector<6.5?'#b45a00':'#c0170f'}">${avgSector}</strong></div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <div style="text-align:center;background:var(--green-bg);border-radius:8px;padding:8px 16px">
+            <div style="font-size:18px;font-weight:800;color:#1a7a3c">${low}</div>
+            <div style="font-size:9px;color:#1a7a3c;font-weight:700">LOW RISK</div>
+          </div>
+          <div style="text-align:center;background:var(--amber-bg);border-radius:8px;padding:8px 16px">
+            <div style="font-size:18px;font-weight:800;color:#b45a00">${mod}</div>
+            <div style="font-size:9px;color:#b45a00;font-weight:700">MODERATE</div>
+          </div>
+          <div style="text-align:center;background:var(--red-bg);border-radius:8px;padding:8px 16px">
+            <div style="font-size:18px;font-weight:800;color:#c0170f">${high}</div>
+            <div style="font-size:9px;color:#c0170f;font-weight:700">HIGH RISK</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Top 5 criteria risks -->
+      <div class="card">
+        <div class="card-title">Top 5 Risk Criteria in ${sector}</div>
+        ${ranked.map((r, i) => {
+          const col = r.avg < 4 ? '#1a7a3c' : r.avg < 6.5 ? '#b45a00' : '#c0170f';
+          const pct = Math.round(r.avg / 10 * 100);
+          return `<div style="margin-bottom:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="width:20px;height:20px;border-radius:50%;background:var(--navy);color:#fff;font-size:10px;font-weight:800;display:inline-flex;align-items:center;justify-content:center">${i+1}</span>
+                <span style="font-size:12px;font-weight:600;color:var(--navy)">${r.label}</span>
+              </div>
+              <span style="font-size:13px;font-weight:800;color:${col}">${r.avg}/10</span>
+            </div>
+            <div style="height:8px;background:#e8ecf4;border-radius:4px;overflow:hidden">
+              <div style="width:${pct}%;height:100%;background:${col};border-radius:4px"></div>
+            </div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px">Sector weight: ${Math.round((WEIGHTS[sector]||DEFAULT_W)[r.idx]*100)}%</div>
+          </div>`;
+        }).join('')}
+      </div>
+
+      <!-- Common flags -->
+      <div class="card">
+        <div class="card-title">Recurring Risk Themes Across Suppliers</div>
+        ${commonFlags.length ? commonFlags.map(([flag, count]) => `
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);gap:12px">
+            <div style="font-size:12px;color:var(--text);flex:1">${flag}</div>
+            <span style="background:var(--red-bg);color:#c0170f;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;white-space:nowrap">${count} supplier${count>1?'s':''}</span>
+          </div>`).join('') :
+          `<div style="font-size:12px;color:var(--muted);padding:8px">No common flags detected — good sector health.</div>`
+        }
+        ${ss.length === 0 ? '<div style="font-size:12px;color:var(--muted);padding:8px">No suppliers scored in this sector yet.</div>' : ''}
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Regulatory context -->
+      <div class="card">
+        <div class="card-title">Key Regulatory Risks for ${sector}</div>
+        ${ctx.regulatory.length ? ctx.regulatory.map(r => `
+          <div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);align-items:flex-start">
+            <span style="color:var(--navy);font-size:14px;flex-shrink:0">⚖️</span>
+            <span style="font-size:12px;color:var(--text);line-height:1.5">${r}</span>
+          </div>`).join('') :
+          `<div style="font-size:12px;color:var(--muted);padding:8px">Regulatory context will populate as more suppliers are scored in this sector.</div>`
+        }
+      </div>
+
+      <!-- Screening checklist -->
+      <div class="card">
+        <div class="card-title">New Supplier Screening Checklist</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Use this when evaluating any supplier in ${sector} not yet in the platform.</div>
+        ${ctx.checklist.length ? ctx.checklist.map((q, i) => `
+          <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);align-items:flex-start">
+            <input type="checkbox" id="chk${i}" style="margin-top:2px;accent-color:var(--navy);flex-shrink:0">
+            <label for="chk${i}" style="font-size:12px;color:var(--text);cursor:pointer;line-height:1.5">${q}</label>
+          </div>`).join('') :
+          `<div style="font-size:12px;color:var(--muted);padding:8px">Checklist not yet defined for this sector.</div>`
+        }
+      </div>
+    </div>
+
+    <!-- Supplier list for this sector -->
+    <div class="card">
+      <div class="card-title">All Scored Suppliers in ${sector} — ranked by risk</div>
+      ${ss.length ? `<div style="display:grid;grid-template-columns:1fr 60px 80px 2fr;gap:12px;padding:6px 4px;border-bottom:2px solid var(--border);font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px">
+        <span>Supplier</span><span>Score</span><span>Risk</span><span>Key Action</span>
+      </div>
+      ${ss.sort((a,b) => calcWA(b)-calcWA(a)).map(s => {
+        const wa = calcWA(s);
+        const rc = wa<4?'#1a7a3c':wa<6.5?'#b45a00':'#c0170f';
+        const rb = wa<4?'badge-low':wa<6.5?'badge-mod':'badge-high';
+        const rl = wa<4?'LOW':wa<6.5?'MODERATE':'HIGH';
+        return `<div style="display:grid;grid-template-columns:1fr 60px 80px 2fr;gap:12px;padding:9px 4px;border-bottom:1px solid var(--border);align-items:center;cursor:pointer;font-size:12px" onclick="showDetail('${s.name.replace(/'/g,"\\'")}')">
+          <span style="font-weight:600;color:var(--navy)">${s.name}</span>
+          <span style="font-weight:800;color:${rc}">${wa}</span>
+          <span><span class="badge ${rb}">${rl}</span></span>
+          <span style="color:var(--muted)">${s.action?s.action.replace(/\.?\s*$/,'.').substring(0,70):''}</span>
+        </div>`;
+      }).join('')}` : `<div style="font-size:12px;color:var(--muted);padding:12px">No suppliers scored in this sector yet. Upload an Excel or report to add them.</div>`}
+    </div>
+  `;
 }
 
 /* ════════════════════════════════════════════
