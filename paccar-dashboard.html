@@ -507,11 +507,11 @@ function renderTiering() {
     if(!items.length){html+='<div style="font-size:12px;color:var(--dim);padding:8px">None</div>'}
     items.sort((a,b)=>calcWA(b)-calcWA(a)).forEach(s=>{
       const wa=calcWA(s),rc=riskColor(s.risk||(wa<4?'LOW':wa<6.5?'MODERATE':'HIGH'));
-      html+=`<div style="display:grid;grid-template-columns:220px 200px 60px 1fr;align-items:center;padding:9px 4px;border-bottom:1px solid var(--border);font-size:12px;cursor:pointer;gap:12px" onclick="showDetail('${s.name.replace(/'/g,"\\'")}')">
+      html+=`<div style="display:grid;grid-template-columns:1fr 1fr 60px 2fr;align-items:center;padding:9px 4px;border-bottom:1px solid var(--border);font-size:12px;cursor:pointer;gap:16px" onclick="showDetail('${s.name.replace(/'/g,"\\'")}')">
         <span style="color:var(--navy);font-weight:600">${s.name}</span>
         <span style="color:var(--muted);font-size:11px">${s.sector}</span>
         <span style="font-weight:700;color:${rc}">${wa}</span>
-        <span style="font-size:11px;color:var(--muted)">${s.action?s.action.substring(0,60)+'…':''}</span>
+        <span style="font-size:11px;color:var(--muted)">${s.action?s.action.replace(/\.?\s*$/,'.')  :''}</span>
       </div>`;
     });
     html+='</div>';
