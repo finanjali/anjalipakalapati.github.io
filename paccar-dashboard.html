@@ -12,9 +12,9 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --navy:#1464B4;--navy-dark:#0F52A0;--navy-light:#1878D0;
-  --bg:#f4f6f9;--card:#ffffff;--surface:#f0f5fb;--surface2:#e3edf8;
-  --blue:#1464B4;--blue-dim:rgba(20,100,180,0.07);--blue-border:rgba(20,100,180,0.2);
+  --navy:#1ca9c9;--navy-dark:#1793b0;--navy-light:#22bedd;
+  --bg:#f4f6f9;--card:#ffffff;--surface:#f0fafb;--surface2:#e0f5f9;
+  --blue:#1ca9c9;--blue-dim:rgba(28,169,201,0.07);--blue-border:rgba(28,169,201,0.25);
   --text:#1a2340;--muted:#5a6a8a;--dim:#8a96b0;
   --green:#1a7a3c;--green-bg:#e8f5ee;--green-bd:#a8d5bb;
   --amber:#b45a00;--amber-bg:#fef3e2;--amber-bd:#f5c97a;
@@ -23,7 +23,7 @@
 }
 body{font-family:'Barlow',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 a{color:var(--navy-light);text-decoration:none}
-.header{display:flex;justify-content:space-between;align-items:center;padding:16px 32px;background:linear-gradient(135deg,#1878D0 0%,#1464B4 50%,#0F52A0 100%);border-bottom:3px solid #C8A84B;box-shadow:0 2px 12px rgba(20,100,180,0.3)}
+.header{display:flex;justify-content:space-between;align-items:center;padding:16px 32px;background:linear-gradient(135deg,#22bedd 0%,#1ca9c9 50%,#1793b0 100%);border-bottom:3px solid #C8A84B;box-shadow:0 2px 12px rgba(28,169,201,0.3)}
 .header-left{display:flex;align-items:center;gap:20px}
 .logo-divider{width:1px;height:40px;background:rgba(255,255,255,0.15)}
 .header-title{font-size:12px;color:rgba(255,255,255,0.85);font-weight:600}
@@ -99,7 +99,7 @@ a{color:var(--navy-light);text-decoration:none}
 .upload-hint{font-size:11px;color:rgba(255,255,255,0.65)}
 .upload-status{font-size:11px;padding:4px 12px;border-radius:20px;background:var(--green-bg);color:var(--green);font-weight:600;display:none}
 .upload-status.error{background:var(--red-bg);color:var(--red)}
-.footer{text-align:center;padding:16px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;border-top:3px solid #C8A84B;margin-top:20px;background:linear-gradient(135deg,#1878D0 0%,#0F52A0 100%);color:rgba(255,255,255,0.5)}
+.footer{text-align:center;padding:16px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;border-top:3px solid #C8A84B;margin-top:20px;background:linear-gradient(135deg,#22bedd 0%,#1793b0 100%);color:rgba(255,255,255,0.5)}
 .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,23,68,0.6);z-index:100;align-items:center;justify-content:center}
 .modal-overlay.show{display:flex}
 .modal{background:var(--card);border-radius:12px;padding:24px;width:680px;max-height:85vh;overflow-y:auto;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,35,102,0.2)}
@@ -135,9 +135,8 @@ a{color:var(--navy-light);text-decoration:none}
 <div class="header">
   <div class="header-left">
     <!-- PACCAR Logo wordmark -->
-    <a href="https://investors.paccar.com/esg/default.aspx" target="_blank" style="display:flex;flex-direction:column;align-items:flex-start;gap:0px;text-decoration:none">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:32px;color:#fff;letter-spacing:6px;line-height:1;text-transform:uppercase;border-bottom:3px solid #C8A84B;padding-bottom:3px">PACCAR</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;color:#C8A84B;letter-spacing:3px;text-transform:uppercase;margin-top:4px">Inc.</div>
+    <a href="https://investors.paccar.com/esg/default.aspx" target="_blank" style="text-decoration:none;display:flex;align-items:center">
+      <img src="https://s202.q4cdn.com/173635405/files/design/logo.png" alt="PACCAR Inc." style="height:40px;width:auto;display:block">
     </a>
     <div class="logo-divider"></div>
     <div>
