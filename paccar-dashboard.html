@@ -446,7 +446,7 @@ function riskColor(r) { return r==='LOW'?'#1a7a3c':r==='HIGH'?'#c0170f':'#b45a00
 function riskBadge(r) { return r==='LOW'?'badge-low':r==='HIGH'?'badge-high':'badge-mod'; }
 function getTier(s) { const wa=calcWA(s); return wa<4?1:wa<6.5?2:3; }
 function tierBadgeClass(t) { return t===1?'badge-low':t===3?'badge-high':'badge-mod'; }
-function getSectors() { return [.new Set(suppliers.map(s=>s.sector))].sort(); }
+function getSectors() { return [...new Set(suppliers.map(s=>s.sector))].sort(); }
 function scoreColor(v) { return v<=3?'var(--green)':v<=6?'var(--amber)':'var(--red)'; }
 function destroyChart(id) { if(chartInstances[id]){chartInstances[id].destroy();delete chartInstances[id];} }
 function toggleFormat() { const f=document.getElementById('formatHint'); f.style.display=f.style.display==='block'?'none':'block'; }
@@ -521,7 +521,7 @@ function renderDashboard() {
   });
 
   // Top 10 risk
-  const top10=[.suppliers].sort((a,b)=>calcWA(b)-calcWA(a)).slice(0,10);
+  const top10=[...suppliers].sort((a,b)=>calcWA(b)-calcWA(a)).slice(0,10);
   destroyChart('chartTopRisk');
   chartInstances.chartTopRisk = new Chart(document.getElementById('chartTopRisk'),{
     type:'bar',
@@ -552,7 +552,7 @@ function renderHeatmap(filter='all') {
   let fb = sectors.map(s=>`<button class="f-btn${filter===s?' active':''}" onclick="filterHeatmap('${s}',this)">${s.length>18?s.substring(0,16)+'.':s}</button>`).join('');
   document.getElementById('heatmapFilters').innerHTML = fb;
 
-  const sorted = heatmapSort.col>=0?[.list].sort((a,b)=>{
+  const sorted = heatmapSort.col>=0?[...list].sort((a,b)=>{
     const va=heatmapSort.col===8?calcWA(a):a.scores[heatmapSort.col];
     const vb=heatmapSort.col===8?calcWA(b):b.scores[heatmapSort.col];
     return heatmapSort.asc?va-vb:vb-va;
@@ -916,7 +916,7 @@ function finishResearch() {
   const risk = score<4?'LOW':score<6.5?'MODERATE':'HIGH';
   const entry = {
     name: currentResearch.name, sector: currentResearch.sector,
-    scores: [.currentResearch.scores], score, risk,
+    scores: [...currentResearch.scores], score, risk,
     sbti:'', vt:'', flag:'', action: document.getElementById('rKeyRiskInput').value
   };
   const existing = suppliers.findIndex(s => s.name.toLowerCase()===entry.name.toLowerCase());
@@ -1357,7 +1357,7 @@ async function loadReport(e){
     document.getElementById('reportSupplierName').value=detectedName;
     document.getElementById('reportModalSub').textContent=`Found signals in ${results.filter(r=>r.found.length>0).length} of 8 criteria`;
     const sectorSel=document.getElementById('reportSector');
-    sectorSel.innerHTML=[.new Set(suppliers.map(s=>s.sector))].sort().map(s=>`<option>${s}</option>`).join('');
+    sectorSel.innerHTML=[...new Set(suppliers.map(s=>s.sector))].sort().map(s=>`<option>${s}</option>`).join('');
     document.getElementById('reportSignals').innerHTML=results.map(r=>`
       <div class="signal-row">
         <div class="signal-label">${r.label}</div>
