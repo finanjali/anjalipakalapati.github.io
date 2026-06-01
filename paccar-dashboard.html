@@ -162,6 +162,7 @@ a{color:var(--navy-light);text-decoration:none}
   <button class="nav-btn" onclick="showPanel('heatmap',this)">Heatmap</button>
   <button class="nav-btn" onclick="showPanel('tiering',this)">Tiering</button>
   <button class="nav-btn" onclick="showPanel('anomalies',this)">Anomalies</button>
+  <button class="nav-btn" onclick="showPanel('research',this)">Research</button>
 </div>
 
 <div class="main">
@@ -183,13 +184,78 @@ a{color:var(--navy-light);text-decoration:none}
       <div class="card"><div class="card-title">Average Risk Score by Sector</div><div class="chart-sm"><canvas id="chartSectorBars"></canvas></div></div>
     </div>
     <div class="card"><div class="card-title">Top 10 Highest-Risk Suppliers</div><div class="chart-box"><canvas id="chartTopRisk"></canvas></div></div>
-    <div class="card"><div class="card-title">Criterion Score Breakdown — Safety-Critical vs Interiors avg</div><div class="chart-sm"><canvas id="chartRadar"></canvas></div></div>
+    <div class="card"><div class="card-title">Criterion Score Breakdown: Safety-Critical vs Interiors avg</div><div class="chart-sm"><canvas id="chartRadar"></canvas></div></div>
   </div>
 
   <!-- SECTORS -->
   <div class="panel" id="p-sectors">
     <div class="filter-bar" id="sectorFilterBar"></div>
     <div id="sectorDetail"></div>
+  </div>
+
+  <!-- RESEARCH -->
+  <div class="panel" id="p-research">
+    <div class="card" id="researchInputCard">
+      <div class="card-title">Research a New Supplier</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Enter a supplier name and sector. Open each database link, search for the company, paste your findings, and the tool will suggest scores. Review before saving.</p>
+      <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+        <div style="flex:2;min-width:200px">
+          <label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">Company Name</label>
+          <input type="text" id="rCompany" placeholder="e.g. Parker Hannifin" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:13px;color:var(--navy)">
+        </div>
+        <div style="flex:1;min-width:160px">
+          <label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">Sector</label>
+          <select id="rSectorInput" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:13px;color:var(--navy)"></select>
+        </div>
+        <button class="btn btn-blue" onclick="startResearch()">Start Research</button>
+      </div>
+    </div>
+    <div id="researchFlow" style="display:none">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div>
+            <div style="font-size:16px;font-weight:800;color:var(--navy)">Researching: <span id="rFlowName" style="color:var(--navy-light)"></span></div>
+            <div style="font-size:11px;color:var(--muted)" id="rFlowSector"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="text-align:center">
+              <div style="font-size:20px;font-weight:800;color:var(--navy)" id="rProgressText">0/7</div>
+              <div style="font-size:9px;color:var(--muted)">sources checked</div>
+            </div>
+            <button class="btn btn-sm" onclick="resetResearch()">Cancel</button>
+          </div>
+        </div>
+        <div style="height:5px;background:var(--surface);border-radius:3px;margin-bottom:18px">
+          <div id="rProgressBar" style="width:0%;height:100%;background:var(--navy);border-radius:3px;transition:width 0.3s"></div>
+        </div>
+        <div id="rSourceSteps"></div>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+            <div>
+              <label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">Key risk summary (one line)</label>
+              <input type="text" id="rKeyRiskInput" placeholder="e.g. No SBTi, CDP B, $2M OSHA penalty" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:12px;color:var(--navy)">
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">Switching cost (1-10)</label>
+              <select id="rSwitchInput" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:12px;color:var(--navy)">
+                <option value="1">1: Commodity, 5+ alternatives</option>
+                <option value="2">2: Easy switch, 4+ alternatives</option>
+                <option value="3">3: Multiple alternatives, 3-6 months</option>
+                <option value="4">4: Some alternatives, 6-9 months</option>
+                <option value="5" selected>5: Limited alternatives, 9-12 months</option>
+                <option value="6">6: Few alternatives, 12 months</option>
+                <option value="7">7: Near sole source, 12-18 months</option>
+                <option value="8">8: Sole source, 18+ months</option>
+                <option value="9">9: Locked in, integrated systems</option>
+                <option value="10">10: Complete dependency</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-blue" onclick="finishResearch()">Save to Dashboard</button>
+        </div>
+      </div>
+    </div>
+    <div id="researchResult" style="display:none"></div>
   </div>
 
   <!-- SECTOR INTEL -->
@@ -229,14 +295,14 @@ a{color:var(--navy-light);text-decoration:none}
   </div>
 </div>
 
-<div class="footer">PACCAR Supplier Sustainability Risk Platform · Team Hopper · Seattle University · 2026 · Scale 1–10 (higher = more risk)</div>
+<div class="footer">PACCAR Supplier Sustainability Risk Platform · Team Hopper · Seattle University · 2026 · Scale 1 to 10 (higher = more risk)</div>
 
 <!-- Report Upload Modal -->
 <div class="modal-overlay" id="reportModal">
   <div class="report-modal">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
       <div>
-        <h2 style="font-size:16px;color:var(--navy);font-weight:800;margin:0" id="reportModalTitle">Analysing Report...</h2>
+        <h2 style="font-size:16px;color:var(--navy);font-weight:800;margin:0" id="reportModalTitle">Reading Report.</h2>
         <p style="font-size:11px;color:var(--muted);margin-top:4px" id="reportModalSub"></p>
       </div>
       <button class="btn btn-sm" onclick="closeReportModal()">✕ Close</button>
@@ -244,7 +310,7 @@ a{color:var(--navy-light);text-decoration:none}
 
     <!-- Progress -->
     <div id="reportProgress" style="margin-bottom:16px">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:4px" id="reportProgressText">Extracting text...</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px" id="reportProgressText">Extracting text.</div>
       <div class="progress-bar"><div class="progress-fill" id="reportProgressBar" style="width:0%"></div></div>
     </div>
 
@@ -268,7 +334,7 @@ a{color:var(--navy-light);text-decoration:none}
       </div>
 
       <div style="margin-bottom:14px">
-        <div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:10px">Suggested Scores — review and adjust before saving (1 = low risk, 10 = high risk)</div>
+        <div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:10px">Suggested Scores: review and adjust before saving (1 = low risk, 10 = high risk)</div>
         <div id="reportScoreGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"></div>
       </div>
 
@@ -311,16 +377,16 @@ const WEIGHTS = {
 const DEFAULT_W = [0.10,0.12,0.15,0.08,0.08,0.18,0.16,0.13];
 
 let suppliers = [
-  {name:"Knorr-Bremse",sector:"Safety-Critical",scores:[1,2,2,2,3,1,2,5],score:2.14,risk:"LOW",sbti:"Validated",vt:"No major US penalties",flag:"✅ Benchmark — EcoDesign leader, SBTi validated",action:"Use as benchmark. Request fossil-free steel adoption roadmap."},
+  {name:"Knorr-Bremse",sector:"Safety-Critical",scores:[1,2,2,2,3,1,2,5],score:2.14,risk:"LOW",sbti:"Validated",vt:"No major US penalties",flag:"✅ Benchmark: EcoDesign leader, SBTi validated",action:"Use as benchmark. Request fossil-free steel adoption roadmap."},
   {name:"ZF Friedrichshafen",sector:"Safety-Critical",scores:[2,2,3,3,3,2,3,5],score:2.82,risk:"LOW",sbti:"Validated",vt:"No major US penalties",flag:"✅ Brake-by-wire 2024, OnGuardMAX ADAS EU GSR II compliant",action:"Maintain. Request EU GSR II compliance roadmap."},
   {name:"Bosch Robert",sector:"Safety-Critical",scores:[1,2,3,2,3,2,3,5],score:2.66,risk:"LOW",sbti:"Validated",vt:"No major US penalties",flag:"✅ CDP A, full ESG, major ADAS R&D investment 2024",action:"Maintain. Request Scope 3 data for brake component manufacturing."},
   {name:"Continental AG",sector:"Safety-Critical",scores:[2,3,4,3,4,3,3,5],score:3.36,risk:"LOW",sbti:"Validated",vt:"$53.4M US group",flag:"⚠ Group-level penalties noted. Auto group spun off Jan 2025",action:"Monitor post spin-off. Request facility-level data."},
-  {name:"Accelera / Cummins",sector:"Safety-Critical",scores:[2,3,3,3,3,8,3,5],score:4.12,risk:"MODERATE",sbti:"Validated",vt:"$4.19B group (Cummins CAA)",flag:"⚠ Cummins $1.675B CAA penalty 2024 — monitor closely",action:"Request direct emissions data and CAA remediation plan."},
+  {name:"Accelera / Cummins",sector:"Safety-Critical",scores:[2,3,3,3,3,8,3,5],score:4.12,risk:"MODERATE",sbti:"Validated",vt:"$4.19B group (Cummins CAA)",flag:"⚠ Cummins $1.675B CAA penalty 2024: monitor closely",action:"Request direct emissions data and CAA remediation plan."},
   {name:"Dana Corporation",sector:"Safety-Critical",scores:[2,3,3,3,4,3,3,5],score:3.24,risk:"LOW",sbti:"Committed",vt:"$2.5M+ group",flag:"✅ Full ESG, active Scope 1+2 targets",action:"Request SBTi validation timeline."},
   {name:"Eaton Corp",sector:"Safety-Critical",scores:[2,2,3,3,4,2,3,5],score:2.94,risk:"LOW",sbti:"Validated",vt:"$39.4M group",flag:"✅ SBTi 50% by 2030. Monitor group-level penalty profile",action:"Request facility-level compliance data."},
   {name:"Hendrickson Spring",sector:"Safety-Critical",scores:[5,4,4,5,4,5,4,7],score:4.66,risk:"MODERATE",sbti:"None",vt:"No records found",flag:"⚠ Sustainability page only. No full ESG or targets.",action:"URGENT: Send supplier questionnaire."},
   {name:"Tenneco / DRiV",sector:"Safety-Critical",scores:[6,4,5,5,4,6,4,5],score:4.86,risk:"MODERATE",sbti:"None",vt:"Limited records",flag:"🔴 Limited disclosure. No SBTi. Green Pad product only.",action:"URGENT: Request copper-free brake pad roadmap."},
-  {name:"Link Mfg.",sector:"Safety-Critical",scores:[8,5,5,6,4,6,4,7],score:5.40,risk:"MODERATE",sbti:"None",vt:"No records found",flag:"⛔ ZERO ESG DATA — No OSHA records found.",action:"CRITICAL: Send full supplier questionnaire immediately."},
+  {name:"Link Mfg.",sector:"Safety-Critical",scores:[8,5,5,6,4,6,4,7],score:5.40,risk:"MODERATE",sbti:"None",vt:"No records found",flag:"⛔ ZERO ESG DATA: No OSHA records found.",action:"CRITICAL: Send full supplier questionnaire immediately."},
   {name:"Continental Surface Sols.",sector:"Interiors",scores:[2,3,3,3,4,2,3,5],score:3.05,risk:"LOW",sbti:"Validated",vt:"Part of Continental group",flag:"✅ EcoProtect -25% PCF. Acella -30% PCF. Series production.",action:"Specify EcoProtect or Acella in next interior refresh."},
   {name:"FORVIA Faurecia",sector:"Interiors",scores:[1,3,4,3,4,2,3,7],score:3.47,risk:"LOW",sbti:"Validated",vt:"$5.6M group",flag:"✅ DECORE programme 2025. CDP A. Monitor 2024 OSHA fatality.",action:"Engage on DECORE programme. Monitor OSHA fatality remediation."},
   {name:"Toyota Boshoku",sector:"Interiors",scores:[2,2,3,3,4,3,3,5],score:3.17,risk:"LOW",sbti:"Committed",vt:"No major US records",flag:"✅ Full ESG. Recycled content and VOC reduction targets.",action:"Request recycled content % for PACCAR seats."},
@@ -328,35 +394,42 @@ let suppliers = [
   {name:"Inteva Products",sector:"Interiors",scores:[5,4,5,5,4,5,4,6],score:4.92,risk:"MODERATE",sbti:"None",vt:"No records found",flag:"⚠ Partial disclosures only. No major ratings or targets.",action:"Send full supplier questionnaire. Request REACH compliance data."},
   {name:"Isringhausen",sector:"Interiors",scores:[6,4,5,6,4,6,4,7],score:5.47,risk:"MODERATE",sbti:"None",vt:"No US records",flag:"⚠ Sustainability claims only. No full ESG.",action:"URGENT: Send full questionnaire."},
   {name:"Carpenter Eng. Foams",sector:"Interiors",scores:[6,4,5,5,4,6,4,6],score:5.22,risk:"MODERATE",sbti:"None",vt:"No records found",flag:"⚠ Parent co. limited ESG. No closed-loop foam programme.",action:"Send questionnaire. Ask about closed-loop foam availability."},
-  {name:"GRA-MAG Truck Interior",sector:"Interiors",scores:[8,5,6,6,4,7,4,6],score:6.02,risk:"MODERATE",sbti:"None",vt:"No records (Canadian HQ)",flag:"⛔ ZERO ESG DATA — No OSHA records.",action:"CRITICAL: Full questionnaire required immediately."},
-  {name:"Seats Inc.",sector:"Interiors",scores:[8,5,6,6,4,7,4,6],score:6.02,risk:"MODERATE",sbti:"None",vt:"No records found",flag:"⛔ ZERO ESG DATA — No OSHA records.",action:"CRITICAL: Full questionnaire required immediately."},
-  {name:"Superior Trim",sector:"Interiors",scores:[8,5,6,7,4,7,4,6],score:6.12,risk:"MODERATE",sbti:"None",vt:"No records found",flag:"⛔ ZERO ESG DATA — 3 US plants with no published data.",action:"CRITICAL: Full questionnaire for all three US plants."},
-  {name:"Michelin",sector:"Tires",scores:[1,1,2,1,3,1,2,5],score:2.13,risk:"LOW",sbti:"Validated (1.5°C)",vt:"No major US penalties",flag:"✅ Benchmark supplier — GPS traceability, CSRD leader",action:"Use as benchmark. Request NR traceability methodology."},
-  {name:"Continental Tire",sector:"Tires",scores:[1,2,3,2,3,2,3,5],score:2.80,risk:"LOW",sbti:"Validated",vt:"$53.4M US / EUR100M global",flag:"✅ EUDR DDS ready — use as second benchmark",action:"Maintain. Monitor post Aumovio spin-off."},
-  {name:"Bridgestone",sector:"Tires",scores:[2,2,3,2,3,2,2,8],score:3.33,risk:"LOW",sbti:"None",vt:"No major US penalties",flag:"⚠ OE since 1991 — switching cost amplifies all risks.",action:"Request EUDR DDS and plantation traceability roadmap by Q3 2026."},
-  {name:"Apollo Tyres",sector:"Tires",scores:[6,7,5,6,4,6,4,5],score:5.54,risk:"MODERATE",sbti:"None",vt:"No records found",flag:"🔴 EUDR DDS not documented — DAF supply at risk by Dec 2026",action:"URGENT: Full questionnaire. EUDR DDS by Q3 2026."},
-  {name:"Prometeon Tyre Group",sector:"Tires",scores:[7,7,5,6,4,6,4,5],score:5.62,risk:"MODERATE",sbti:"None",vt:"No records found",flag:"🔴 No standalone ESG post spin-off — confirm EUDR capability urgently",action:"URGENT: Confirm EUDR DDS capability. Request standalone disclosure."},
+  {name:"GRA-MAG Truck Interior",sector:"Interiors",scores:[8,5,6,6,4,7,4,6],score:6.02,risk:"MODERATE",sbti:"None",vt:"No records (Canadian HQ)",flag:"⛔ ZERO ESG DATA: No OSHA records.",action:"CRITICAL: Full questionnaire required immediately."},
+  {name:"Seats Inc.",sector:"Interiors",scores:[8,5,6,6,4,7,4,6],score:6.02,risk:"MODERATE",sbti:"None",vt:"No records found",flag:"⛔ ZERO ESG DATA: No OSHA records.",action:"CRITICAL: Full questionnaire required immediately."},
+  {name:"Superior Trim",sector:"Interiors",scores:[8,5,6,7,4,7,4,6],score:6.12,risk:"MODERATE",sbti:"None",vt:"No records found",flag:"⛔ ZERO ESG DATA: 3 US plants with no published data.",action:"CRITICAL: Full questionnaire for all three US plants."},
+  {name:"Michelin",sector:"Tires",scores:[1,1,2,1,3,1,2,5],score:2.13,risk:"LOW",sbti:"Validated (1.5°C)",vt:"No major US penalties",flag:"✅ Benchmark supplier: GPS traceability, CSRD leader",action:"Use as benchmark. Request NR traceability methodology."},
+  {name:"Continental Tire",sector:"Tires",scores:[1,2,3,2,3,2,3,5],score:2.80,risk:"LOW",sbti:"Validated",vt:"$53.4M US / EUR100M global",flag:"✅ EUDR DDS ready: use as second benchmark",action:"Maintain. Monitor post Aumovio spin-off."},
+  {name:"Bridgestone",sector:"Tires",scores:[2,2,3,2,3,2,2,8],score:3.33,risk:"LOW",sbti:"None",vt:"No major US penalties",flag:"⚠ OE since 1991: switching cost amplifies all risks.",action:"Request EUDR DDS and plantation traceability roadmap by Q3 2026."},
+  {name:"Apollo Tyres",sector:"Tires",scores:[6,7,5,6,4,6,4,5],score:5.54,risk:"MODERATE",sbti:"None",vt:"No records found",flag:"🔴 EUDR DDS not documented: DAF supply at risk by Dec 2026",action:"URGENT: Full questionnaire. EUDR DDS by Q3 2026."},
+  {name:"Prometeon Tyre Group",sector:"Tires",scores:[7,7,5,6,4,6,4,5],score:5.62,risk:"MODERATE",sbti:"None",vt:"No records found",flag:"🔴 No standalone ESG post spin-off: confirm EUDR capability urgently",action:"URGENT: Confirm EUDR DDS capability. Request standalone disclosure."},
   {name:"Yokohama",sector:"Tires",scores:[4,4,4,5,4,5,3,4],score:4.07,risk:"MODERATE",sbti:"None",vt:"No records found",flag:"⚠ GPSNR member (positive) but limited Scope 3 and no SBTi",action:"Request EUDR DDS and Scope 3 data."},
   {name:"Axalta",sector:"Coatings",scores:[3,4,5,3,4,3,3,9],score:4.27,risk:"MODERATE",sbti:"None",vt:"No records found",flag:"🔴 Locked-in supplier + AkzoNobel merger uncertainty + PFAS unresolved",action:"Request PFAS inventory for EPA TSCA immediately. Monitor merger."},
-  {name:"Norma Group",sector:"Coatings",scores:[1,2,3,3,4,3,2,5],score:2.90,risk:"LOW",sbti:"None",vt:"No records found",flag:"✅ Best-in-class disclosure — use as benchmark for private suppliers",action:"Use as disclosure benchmark for private hose/clamp suppliers."},
+  {name:"Norma Group",sector:"Coatings",scores:[1,2,3,3,4,3,2,5],score:2.90,risk:"LOW",sbti:"None",vt:"No records found",flag:"✅ Best-in-class disclosure: use as benchmark for private suppliers",action:"Use as disclosure benchmark for private hose/clamp suppliers."},
   {name:"Flexfab",sector:"Coatings",scores:[8,7,7,8,5,8,5,7],score:7.04,risk:"HIGH",sbti:"None",vt:"$4,410 OSHA penalty 2022",flag:"⛔ ZERO ESG DATA + OSHA record: $4,410 penalty 2022. Chemical risk unknown.",action:"URGENT: Send full questionnaire. OSHA record confirmed."},
-  {name:"Paramont Mfg",sector:"Coatings",scores:[8,8,8,8,5,8,5,7],score:7.34,risk:"HIGH",sbti:"None",vt:"No records found",flag:"⛔ ZERO ESG DATA — No OSHA records found.",action:"URGENT: Send full questionnaire. Cannot confirm compliance."},
+  {name:"Paramont Mfg",sector:"Coatings",scores:[8,8,8,8,5,8,5,7],score:7.34,risk:"HIGH",sbti:"None",vt:"No records found",flag:"⛔ ZERO ESG DATA: No OSHA records found.",action:"URGENT: Send full questionnaire. Cannot confirm compliance."},
   {name:"Johnson Welded Products",sector:"Coatings",scores:[8,8,7,8,5,8,5,6],score:7.02,risk:"HIGH",sbti:"None",vt:"$8,000 OSHA Jun 2025",flag:"⛔ ZERO ESG DATA + OSHA record: $8,000 penalty Jun 2025.",action:"URGENT: Send full questionnaire. Most recent enforcement of all suppliers."},
-  {name:"Creative Liquid Coatings",sector:"Coatings",scores:[9,9,9,8,5,8,5,8],score:7.84,risk:"HIGH",sbti:"None",vt:"$21,000 OSHA 2022-2024",flag:"🚨 CRITICAL — 4 OSHA inspections, $21,000 penalty. Chrome plating = PFAS risk. Title V emitter.",action:"CRITICAL: 4 OSHA inspections 2022-2024. Chrome plating PFAS risk. Section 3 questionnaire within 30 days."},
+  {name:"Creative Liquid Coatings",sector:"Coatings",scores:[9,9,9,8,5,8,5,8],score:7.84,risk:"HIGH",sbti:"None",vt:"$21,000 OSHA 2022-2024",flag:"🚨 CRITICAL: 4 OSHA inspections, $21,000 penalty. Chrome plating = PFAS risk. Title V emitter.",action:"CRITICAL: 4 OSHA inspections 2022-2024. Chrome plating PFAS risk. Section 3 questionnaire within 30 days."},
   {name:"TE Connectivity",sector:"Electronics, Wiring & Sensors",scores:[2,2,3,3,7,2,3,5],score:3.54,risk:"LOW",sbti:"Validated",vt:"$35.6M (25 records)",flag:"✅ SBTi Validated, strong conflict minerals programme",action:"Maintain. Request 3TG traceability methodology."},
   {name:"Leoni",sector:"Electronics, Wiring & Sensors",scores:[4,4,5,5,6,5,4,8],score:5.19,risk:"MODERATE",sbti:"None",vt:"No US records",flag:"⚠ No SBTi. Sole-source wiring harnesses, switching cost 8.",action:"URGENT: Request wiring harness alternative qualification plan."},
   {name:"FORVIA / Hella",sector:"Electronics, Wiring & Sensors",scores:[2,3,4,3,5,2,3,7],score:3.79,risk:"LOW",sbti:"Validated",vt:"$5.6M group",flag:"✅ CDP A, full ESG. FORVIA group SBTi Validated.",action:"Maintain. Request Scope 3 data for electronics manufacturing."},
   {name:"Sensata Technologies",sector:"Electronics, Wiring & Sensors",scores:[2,3,4,3,5,4,3,5],score:3.75,risk:"LOW",sbti:"Committed",vt:"$13,651 (2 records)",flag:"✅ SBTi Committed, full ESG disclosure.",action:"Maintain. Request SBTi validation timeline."},
   {name:"Kongsberg Automotive",sector:"Electronics, Wiring & Sensors",scores:[3,5,4,5,5,5,3,8],score:4.83,risk:"MODERATE",sbti:"None",vt:"No US records",flag:"⚠ Sole-source + no SBTi + CDP C (Water) only.",action:"URGENT: Request sustainability roadmap. Sole-source risk is critical."},
   {name:"Valeo",sector:"Electronics, Wiring & Sensors",scores:[1,3,3,3,6,2,3,5],score:3.46,risk:"LOW",sbti:"Validated",vt:"$33.5M group",flag:"✅ CDP A, SBTi Validated, strong ESG programme.",action:"Maintain. Monitor group-level penalty profile."},
-  {name:"Mitsubishi Electric",sector:"Electronics, Wiring & Sensors",scores:[2,3,3,3,6,3,7,3],score:4.09,risk:"MODERATE",sbti:"Validated",vt:"$384.5M (18 records)",flag:"⚠ Defective parts 7 — 40-year data falsification on record.",action:"Request quality assurance certification for PACCAR-specific components."},
-  {name:"Clarios",sector:"Electronics, Wiring & Sensors",scores:[4,5,8,5,4,6,3,6],score:4.99,risk:"MODERATE",sbti:"None",vt:"$39K / $1.1B (JCI legacy)",flag:"⚠ Hazwaste 8 — JCI legacy $1.1B. Lead exposure records.",action:"Request hazardous waste management plan for PACCAR-supplying plants."},
+  {name:"Mitsubishi Electric",sector:"Electronics, Wiring & Sensors",scores:[2,3,3,3,6,3,7,3],score:4.09,risk:"MODERATE",sbti:"Validated",vt:"$384.5M (18 records)",flag:"⚠ Defective parts 7: 40-year data falsification on record.",action:"Request quality assurance certification for PACCAR-specific components."},
+  {name:"Clarios",sector:"Electronics, Wiring & Sensors",scores:[4,5,8,5,4,6,3,6],score:4.99,risk:"MODERATE",sbti:"None",vt:"$39K / $1.1B (JCI legacy)",flag:"⚠ Hazwaste 8: JCI legacy $1.1B. Lead exposure records.",action:"Request hazardous waste management plan for PACCAR-supplying plants."},
   {name:"Donaldson",sector:"Fluids, Filtration & Emissions",scores:[1,2,3,2,2,1,2,6],score:2.36,risk:"LOW",sbti:"Validated",vt:"$2.5M (26 records)",flag:"✅ Lowest risk in portfolio. SBTi Validated, CDP A-.",action:"Use as benchmark for filtration sector."},
-  {name:"Parker Hannifin",sector:"Fluids, Filtration & Emissions",scores:[2,2,5,3,3,3,3,4],score:3.30,risk:"LOW",sbti:"Committed",vt:"$39.4M (136 records)",flag:"⚠ 136 Violation Tracker records — most in portfolio. SBTi Committed.",action:"Request facility-level compliance data for PACCAR-supplying plants."},
+  {name:"Parker Hannifin",sector:"Fluids, Filtration & Emissions",scores:[2,2,5,3,3,3,3,4],score:3.30,risk:"LOW",sbti:"Committed",vt:"$39.4M (136 records)",flag:"⚠ 136 Violation Tracker records: most in portfolio. SBTi Committed.",action:"Request facility-level compliance data for PACCAR-supplying plants."},
   {name:"Cummins Emission Solutions",sector:"Fluids, Filtration & Emissions",scores:[4,2,4,3,3,8,5,5],score:4.76,risk:"MODERATE",sbti:"Validated",vt:"$4.19B (94 records)",flag:"⚠ $1.675B CAA penalty 2024. High CO2 compliance risk.",action:"Request CAA remediation plan and emissions monitoring data."},
-  {name:"Voss Fluid",sector:"Fluids, Filtration & Emissions",scores:[5,4,4,5,3,5,3,4],score:4.24,risk:"MODERATE",sbti:"None",vt:"No records",flag:"⚠ No ESG ratings — zero third-party assessment.",action:"Send supplier questionnaire. Request sustainability disclosure."},
+  {name:"Voss Fluid",sector:"Fluids, Filtration & Emissions",scores:[5,4,4,5,3,5,3,4],score:4.24,risk:"MODERATE",sbti:"None",vt:"No records",flag:"⚠ No ESG ratings: zero third-party assessment.",action:"Send supplier questionnaire. Request sustainability disclosure."},
   {name:"Sogefi Filtration",sector:"Fluids, Filtration & Emissions",scores:[4,3,4,4,5,5,3,7],score:4.40,risk:"MODERATE",sbti:"None",vt:"Minimal",flag:"⚠ Switching cost 7 + no SBTi + limited disclosure.",action:"Request ESG disclosure and SBTi commitment timeline."},
-  {name:"Phillips & Temro Industries",sector:"Fluids, Filtration & Emissions",scores:[7,5,5,6,6,6,3,8],score:5.65,risk:"MODERATE",sbti:"None",vt:"Minimal",flag:"🔴 Highest risk in fluids sector — ESG 7, switching 8, zero ratings.",action:"URGENT: Send full questionnaire. Switching cost 8 makes this a priority."}
+  {name:"Phillips & Temro Industries",sector:"Fluids, Filtration & Emissions",scores:[7,5,5,6,6,6,3,8],score:5.65,risk:"MODERATE",sbti:"None",vt:"Minimal",flag:"🔴 Highest risk in fluids sector. ESG 7, switching 8, zero ratings.",action:"URGENT: Send full questionnaire. Switching cost 8 makes this a priority."},
+  // Powertrain & Driveline (from Dynamic Scoring Model, scores mapped to 1-10 risk scale)
+  {name:"Dana Corporation (Powertrain)",sector:"Powertrain & Driveline",scores:[2,4,4,2,4,5,4,5],score:3.48,risk:"LOW",sbti:"Committed",vt:"$2.5M+ group",flag:"Scope 3 and PCF data gap. ISO 14001 and 45001 certified. Strong renewable energy progress.",action:"Request Scope 3 product-level data and carbon footprint documentation for driveline components."},
+  {name:"AAM (American Axle)",sector:"Powertrain & Driveline",scores:[2,2,4,2,4,7,2,5],score:3.54,risk:"LOW",sbti:"None",vt:"No major records",flag:"Scope 3 and PCF gap. Strong safety record. ISO 14001 certified across major sites.",action:"Request SBTi commitment timeline and product carbon footprint for EV driveline components."},
+  {name:"Cummins (Powertrain)",sector:"Powertrain & Driveline",scores:[2,6,5,4,4,4,6,7],score:4.38,risk:"MODERATE",sbti:"Validated",vt:"$4.19B group (CAA penalty)",flag:"Safety and governance gap on record. $1.675B Clean Air Act penalty 2024. BEV products positive.",action:"Request facility-level emissions data and CAA consent decree remediation timeline."},
+  {name:"Eaton Corp (Powertrain)",sector:"Powertrain & Driveline",scores:[2,4,2,6,4,4,4,5],score:3.74,risk:"LOW",sbti:"Validated",vt:"$39.4M group",flag:"Climate data gap at product level. Strong materials and waste programmes. SBTi 50% by 2030.",action:"Request climate transition roadmap for hybrid and EV powertrain product lines."},
+  {name:"ZF Friedrichshafen (Powertrain)",sector:"Powertrain & Driveline",scores:[2,9,3,5,4,8,9,6],score:5.82,risk:"MODERATE",sbti:"Validated",vt:"$53.4M US group",flag:"Critical safety and governance gap. Scope 3 data absent. Strong sector fit and ESG disclosure.",action:"URGENT: Request Scope 3 and safety governance data. Monitor post spin-off of Aumovio."},
+  {name:"Allison Transmission",sector:"Powertrain & Driveline",scores:[8,6,9,9,4,8,6,4],score:7.12,risk:"HIGH",sbti:"None",vt:"No major records",flag:"Multiple critical gaps: climate, materials, circularity, safety governance, evidence quality. Very limited ESG data published.",action:"CRITICAL: Full supplier questionnaire required. No climate targets, no waste data, no ISO certifications confirmed."}
 ];
 
 let chartInstances = {};
@@ -373,7 +446,7 @@ function riskColor(r) { return r==='LOW'?'#1a7a3c':r==='HIGH'?'#c0170f':'#b45a00
 function riskBadge(r) { return r==='LOW'?'badge-low':r==='HIGH'?'badge-high':'badge-mod'; }
 function getTier(s) { const wa=calcWA(s); return wa<4?1:wa<6.5?2:3; }
 function tierBadgeClass(t) { return t===1?'badge-low':t===3?'badge-high':'badge-mod'; }
-function getSectors() { return [...new Set(suppliers.map(s=>s.sector))].sort(); }
+function getSectors() { return [.new Set(suppliers.map(s=>s.sector))].sort(); }
 function scoreColor(v) { return v<=3?'var(--green)':v<=6?'var(--amber)':'var(--red)'; }
 function destroyChart(id) { if(chartInstances[id]){chartInstances[id].destroy();delete chartInstances[id];} }
 function toggleFormat() { const f=document.getElementById('formatHint'); f.style.display=f.style.display==='block'?'none':'block'; }
@@ -388,6 +461,7 @@ function showPanel(name, btn) {
   if(name==='dashboard') renderDashboard();
   if(name==='heatmap') renderHeatmap('all');
   if(name==='sectorintel') renderSectorIntel(getSectors()[0]);
+  if(name==='research') initResearch();
   if(name==='tiering') renderTiering();
   if(name==='anomalies') renderAnomalies();
   if(name==='sectors') renderSectorList();
@@ -403,7 +477,7 @@ function renderMetrics() {
   document.getElementById('metricsBar').innerHTML=`
     <div class="m-card"><div class="m-label">Total Suppliers</div><div class="m-val" style="color:var(--blue)">${suppliers.length}</div><div class="m-sub">${sectors} sectors</div></div>
     <div class="m-card"><div class="m-label">Low Risk</div><div class="m-val" style="color:var(--green)">${low}</div><div class="m-sub">Score &lt; 4.0</div></div>
-    <div class="m-card"><div class="m-label">Moderate Risk</div><div class="m-val" style="color:var(--amber)">${mod}</div><div class="m-sub">Score 4.0 – 6.4</div></div>
+    <div class="m-card"><div class="m-label">Moderate Risk</div><div class="m-val" style="color:var(--amber)">${mod}</div><div class="m-sub">Score 4.0 to 6.4</div></div>
     <div class="m-card"><div class="m-label">High Risk</div><div class="m-val" style="color:var(--red)">${high}</div><div class="m-sub">Score ≥ 6.5</div></div>
     <div class="m-card"><div class="m-label">Portfolio Avg</div><div class="m-val" style="color:var(--navy)">${avg}</div><div class="m-sub">Weighted avg score</div></div>`;
 }
@@ -442,12 +516,12 @@ function renderDashboard() {
   destroyChart('chartSectorBars');
   chartInstances.chartSectorBars = new Chart(document.getElementById('chartSectorBars'),{
     type:'bar',
-    data:{labels:sectors.map(s=>s.length>18?s.substring(0,16)+'…':s),datasets:[{data:avgs,backgroundColor:avgs.map(a=>a<4?'#43a047':a<6.5?'#f9a825':'#e53935'),borderRadius:4,barThickness:18}]},
+    data:{labels:sectors.map(s=>s.length>18?s.substring(0,16)+'.':s),datasets:[{data:avgs,backgroundColor:avgs.map(a=>a<4?'#43a047':a<6.5?'#f9a825':'#e53935'),borderRadius:4,barThickness:18}]},
     options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{grid:{color:'rgba(0,35,102,0.06)'},ticks:{color:'#5a6a8a',font:{size:10}},max:10},y:{grid:{display:false},ticks:{color:'#1a2340',font:{size:10}}}},plugins:{legend:{display:false}}}
   });
 
   // Top 10 risk
-  const top10=[...suppliers].sort((a,b)=>calcWA(b)-calcWA(a)).slice(0,10);
+  const top10=[.suppliers].sort((a,b)=>calcWA(b)-calcWA(a)).slice(0,10);
   destroyChart('chartTopRisk');
   chartInstances.chartTopRisk = new Chart(document.getElementById('chartTopRisk'),{
     type:'bar',
@@ -455,7 +529,7 @@ function renderDashboard() {
     options:{responsive:true,maintainAspectRatio:false,scales:{y:{grid:{color:'rgba(0,35,102,0.06)'},ticks:{color:'#5a6a8a',font:{size:10}},max:10},x:{grid:{display:false},ticks:{color:'#1a2340',font:{size:10},maxRotation:30}}},plugins:{legend:{display:false}}}
   });
 
-  // Radar — segment comparison
+  // Radar: segment comparison
   const critKeys = ["ESG Disclosure","Human Rights","Haz Waste","Energy Supply","Conflict Min","CO2 Compliance","Defective Parts","Switch Cost"];
   const safety = suppliers.filter(s=>s.sector==='Safety-Critical');
   const interiors = suppliers.filter(s=>s.sector==='Interiors');
@@ -475,10 +549,10 @@ function renderDashboard() {
 function renderHeatmap(filter='all') {
   const list = filter==='all'?suppliers:suppliers.filter(s=>s.sector===filter);
   const sectors = getSectors();
-  let fb = sectors.map(s=>`<button class="f-btn${filter===s?' active':''}" onclick="filterHeatmap('${s}',this)">${s.length>18?s.substring(0,16)+'…':s}</button>`).join('');
+  let fb = sectors.map(s=>`<button class="f-btn${filter===s?' active':''}" onclick="filterHeatmap('${s}',this)">${s.length>18?s.substring(0,16)+'.':s}</button>`).join('');
   document.getElementById('heatmapFilters').innerHTML = fb;
 
-  const sorted = heatmapSort.col>=0?[...list].sort((a,b)=>{
+  const sorted = heatmapSort.col>=0?[.list].sort((a,b)=>{
     const va=heatmapSort.col===8?calcWA(a):a.scores[heatmapSort.col];
     const vb=heatmapSort.col===8?calcWA(b):b.scores[heatmapSort.col];
     return heatmapSort.asc?va-vb:vb-va;
@@ -528,7 +602,7 @@ function drillSector(sec) {
   const w = WEIGHTS[sec]||DEFAULT_W;
   const avg = (ss.reduce((a,s)=>a+calcWA(s),0)/ss.length).toFixed(1);
   const sectors = getSectors();
-  document.getElementById('sectorFilterBar').innerHTML = sectors.map(s=>`<button class="f-btn${s===sec?' active':''}" onclick="drillSector('${s}')">${s.length>18?s.substring(0,16)+'…':s}</button>`).join('');
+  document.getElementById('sectorFilterBar').innerHTML = sectors.map(s=>`<button class="f-btn${s===sec?' active':''}" onclick="drillSector('${s}')">${s.length>18?s.substring(0,16)+'.':s}</button>`).join('');
 
   let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
     <div style="font-size:15px;font-weight:700;color:#fff">${sec}</div>
@@ -564,7 +638,7 @@ function renderTiering() {
   destroyChart('chartTierBar');
   chartInstances.chartTierBar = new Chart(document.getElementById('chartTierBar'),{
     type:'bar',
-    data:{labels:['Tier 1 — Low Risk','Tier 2 — Monitor','Tier 3 — High Risk'],datasets:[{data:[t1.length,t2.length,t3.length],backgroundColor:['#1a7a3c','#b45a00','#c0170f'],borderRadius:6,barThickness:50}]},
+    data:{labels:['Tier 1: Low Risk','Tier 2: Monitor','Tier 3: High Risk'],datasets:[{data:[t1.length,t2.length,t3.length],backgroundColor:['#1a7a3c','#b45a00','#c0170f'],borderRadius:6,barThickness:50}]},
     options:{responsive:true,maintainAspectRatio:false,scales:{y:{grid:{color:'rgba(0,35,102,0.06)'},ticks:{color:'#5a6a8a'}},x:{grid:{display:false},ticks:{color:'#1a2340',font:{size:11}}}},plugins:{legend:{display:false}}}
   });
 
@@ -583,7 +657,7 @@ function renderTiering() {
   });
 
   let html='';
-  [{tier:3,label:'Tier 3 — High Risk (≥ 6.5)',cls:'badge-high',items:t3},{tier:2,label:'Tier 2 — Monitor (4.0 – 6.4)',cls:'badge-mod',items:t2},{tier:1,label:'Tier 1 — Low Risk (< 4.0)',cls:'badge-low',items:t1}].forEach(({label,cls,items})=>{
+  [{tier:3,label:'Tier 3: High Risk (≥ 6.5)',cls:'badge-high',items:t3},{tier:2,label:'Tier 2: Monitor (4.0 to 6.4)',cls:'badge-mod',items:t2},{tier:1,label:'Tier 1: Low Risk (< 4.0)',cls:'badge-low',items:t1}].forEach(({label,cls,items})=>{
     html+=`<div class="card"><div class="card-title">${label} <span class="badge ${cls}">${items.length}</span></div>`;
     if(!items.length){html+='<div style="font-size:12px;color:var(--dim);padding:8px">None</div>'}
     items.sort((a,b)=>calcWA(b)-calcWA(a)).forEach(s=>{
@@ -645,16 +719,16 @@ function showDetail(name) {
     </div>
     <div class="section-label">Compliance & Ratings</div>
     <div class="detail-grid">
-      <div class="detail-item"><div class="d-label">SBTi Status</div><div class="d-val">${s.sbti||'—'}</div></div>
-      <div class="detail-item"><div class="d-label">Violation Tracker</div><div class="d-val" style="font-size:12px">${s.vt||'—'}</div></div>
+      <div class="detail-item"><div class="d-label">SBTi Status</div><div class="d-val">${s.sbti||', '}</div></div>
+      <div class="detail-item"><div class="d-label">Violation Tracker</div><div class="d-val" style="font-size:12px">${s.vt||', '}</div></div>
     </div>
     <div class="section-label">Flag / Anomaly</div>
-    <div class="info-block">${s.flag||'—'}</div>
+    <div class="info-block">${s.flag||', '}</div>
     <div class="section-label">Key Action</div>
-    <div class="info-block action-block">${s.action||'—'}</div>
+    <div class="info-block action-block">${s.action||', '}</div>
     <div style="margin-top:12px;padding:10px;background:var(--surface);border-radius:8px;font-size:11px">
       <span style="color:var(--blue);font-weight:600">Recommended review: </span>
-      <span style="color:var(--muted)">${getTier(s)===3?'Quarterly — Immediate action required':getTier(s)===2?'Semi-annually — Monitor key risk indicators':'Annually — Standard monitoring cycle'}</span>
+      <span style="color:var(--muted)">${getTier(s)===3?'Quarterly: Immediate action required':getTier(s)===2?'Semi-annually: Monitor key risk indicators':'Annually: Standard monitoring cycle'}</span>
     </div>`;
   document.getElementById('detailModal').classList.add('show');
 }
@@ -666,7 +740,7 @@ function loadExcel(e) {
   const file = e.target.files[0];
   if(!file) return;
   const status = document.getElementById('uploadStatus');
-  status.style.display='inline-block'; status.className='upload-status'; status.textContent='Reading...';
+  status.style.display='inline-block'; status.className='upload-status'; status.textContent='Reading.';
   const reader = new FileReader();
   reader.onload = ev => {
     try {
@@ -705,31 +779,212 @@ function loadExcel(e) {
 }
 
 /* ════════════════════════════════════════════
+   RESEARCH TAB
+   ════════════════════════════════════════════ */
+const RESEARCH_SOURCES = [
+  { id:"vt", name:"Violation Tracker", desc:"Total enforcement penalties, records, violation types across all US agencies",
+    url: c => `https://violationtracker.goodjobsfirst.org/parent/${encodeURIComponent(c)}`,
+    criteria:[0,1], autoScore: t => {
+      if(/no record|0 record|not found/i.test(t)) return {s:[2,2],h:["No records","Clean record"]};
+      if(/\$[1-9]\d{2}[Mm]|\$\d+[Bb]/i.test(t)) return {s:[7,6],h:["Major penalties ($100M+)","Serious violations"]};
+      if(/\$\d{1,2}[Mm]/i.test(t)) return {s:[5,5],h:["Moderate penalties","Some violations"]};
+      return {s:[3,3],h:["Minor records","Minor records"]};
+    }},
+  { id:"epa", name:"EPA ECHO", desc:"Environmental compliance history, Clean Air Act, Clean Water Act, RCRA hazardous waste violations",
+    url: c => `https://echo.epa.gov/facilities/facility-search/results?search=${encodeURIComponent(c)}&view=map`,
+    criteria:[2,5], autoScore: t => {
+      const s=[3,3],h=["No major EPA findings","No major CAA findings"];
+      if(/superfund|cercla/i.test(t)){s[0]=8;h[0]="Superfund site";}
+      else if(/rcra|hazardous waste.*penalty/i.test(t)){s[0]=6;h[0]="RCRA violation";}
+      if(/defeat device|clean air act.*penalty/i.test(t)){s[1]=8;h[1]="CAA violation";}
+      return {s,h};
+    }},
+  { id:"osha", name:"OSHA Enforcement", desc:"Workplace safety inspections, citations, penalties and fatalities",
+    url: c => `https://www.osha.gov/cgi-bin/est/est1?establishment=${encodeURIComponent(c)}&state=0&naics=&p_start=&p_finish=0&p_sort=10&p_desc=DESC&p_direction=Next&p_show=20`,
+    criteria:[1], autoScore: t => {
+      if(/fatal|death|killed/i.test(t)) return {s:[8],h:["Fatality on record"]};
+      if(/willful/i.test(t)) return {s:[7],h:["Willful violations"]};
+      if(/\$[5-9]\d{4}|\$[1-9]\d{5}/i.test(t)) return {s:[6],h:["Penalties over $50K"]};
+      if(/no record|not found/i.test(t)) return {s:[2],h:["No OSHA findings"]};
+      return {s:[4],h:["Minor findings"]};
+    }},
+  { id:"cdp", name:"CDP Climate Scores", desc:"CDP Climate Change, Water Security and Forests disclosure scores",
+    url: c => `https://www.cdp.net/en/responses?queries%5Bname%5D=${encodeURIComponent(c)}`,
+    criteria:[0,5], autoScore: t => {
+      if(/\bA\b|A-/i.test(t)) return {s:[2,2],h:["CDP A/A-","Strong climate action"]};
+      if(/\bB\b|B-/i.test(t)) return {s:[3,4],h:["CDP B/B-","Moderate"]};
+      if(/\bC\b|C-|D/i.test(t)) return {s:[5,5],h:["CDP C/D","Limited"]};
+      return {s:[6,6],h:["Not disclosed","Not disclosed"]};
+    }},
+  { id:"sbti", name:"SBTi Target Dashboard", desc:"Science Based Targets: Validated, Committed, or not listed",
+    url: () => `https://sciencebasedtargets.org/companies-taking-action#table`,
+    criteria:[5], autoScore: t => {
+      if(/validated|approved/i.test(t)) return {s:[2],h:["SBTi Validated"]};
+      if(/committed/i.test(t)) return {s:[4],h:["SBTi Committed"]};
+      return {s:[6],h:["Not listed on SBTi"]};
+    }},
+  { id:"sec", name:"SEC EDGAR (Conflict Minerals)", desc:"Annual SD filings, CMRT, 3TG traceability disclosures",
+    url: c => `https://efts.sec.gov/LATEST/search-index?q=%22${encodeURIComponent(c)}%22&forms=SD&dateRange=custom&startdt=2020-01-01`,
+    criteria:[4], autoScore: t => {
+      if(/cmrt.*publish|full traceability|rmap/i.test(t)) return {s:[2],h:["Full CMRT published"]};
+      if(/cmrt|sd filing/i.test(t)) return {s:[4],h:["CMRT filed"]};
+      if(/no filing|not found/i.test(t)) return {s:[7],h:["No filing found"]};
+      return {s:[5],h:["Limited visibility"]};
+    }},
+  { id:"msci", name:"MSCI ESG Ratings", desc:"MSCI ESG rating (AAA to CCC) and controversies screen",
+    url: () => `https://www.msci.com/our-solutions/esg-investing/esg-ratings-climate-search-tool`,
+    criteria:[0,6], autoScore: t => {
+      if(/\bAAA\b|\bAA\b/i.test(t)) return {s:[2,2],h:["MSCI AA/AAA","Strong quality"]};
+      if(/\bBBB\b|\bBB\b/i.test(t)) return {s:[3,3],h:["MSCI BBB/BB","Adequate"]};
+      if(/\bB\b|\bCCC\b/i.test(t)) return {s:[6,6],h:["MSCI B/CCC","Laggard"]};
+      return {s:[5,4],h:["Not rated","No data"]};
+    }}
+];
+
+let currentResearch = null;
+
+function initResearch() {
+  const sel = document.getElementById('rSectorInput');
+  if(sel) sel.innerHTML = getSectors().map(s => `<option>${s}</option>`).join('');
+}
+
+function startResearch() {
+  const name = document.getElementById('rCompany').value.trim();
+  const sector = document.getElementById('rSectorInput').value;
+  if(!name) { alert('Enter a company name.'); return; }
+  currentResearch = { name, sector, scores: new Array(8).fill(5), findings: {} };
+  document.getElementById('rFlowName').textContent = name;
+  document.getElementById('rFlowSector').textContent = sector;
+  document.getElementById('researchInputCard').style.display = 'none';
+  document.getElementById('researchFlow').style.display = 'block';
+  document.getElementById('researchResult').style.display = 'none';
+  renderSourceSteps();
+}
+
+function renderSourceSteps() {
+  const c = currentResearch.name;
+  const done = Object.keys(currentResearch.findings).length;
+  document.getElementById('rProgressText').textContent = `${done}/7`;
+  document.getElementById('rProgressBar').style.width = Math.round(done/7*100) + '%';
+
+  document.getElementById('rSourceSteps').innerHTML = RESEARCH_SOURCES.map((src, i) => {
+    const finding = currentResearch.findings[src.id];
+    return `<div style="display:flex;align-items:flex-start;gap:12px;background:var(--surface);border-radius:8px;padding:12px 14px;margin-bottom:8px;border:1px solid ${finding?'var(--green-bd)':'var(--border)'}">
+      <div style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;${finding?'background:var(--navy);color:#fff':'background:var(--surface2);color:var(--muted)'}">
+        ${finding?'✓':i+1}
+      </div>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:700;color:var(--navy)">${src.name}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${src.desc}</div>
+        ${finding?`<div style="font-size:11px;color:var(--green);margin-top:4px;font-weight:600">Scored: ${finding.hint}</div>`:''}
+        <div id="finding-${src.id}" style="display:none;margin-top:8px">
+          <textarea id="text-${src.id}" style="width:100%;min-height:60px;padding:8px;border-radius:6px;border:1px solid var(--border);font-size:11px;color:var(--text);font-family:inherit;resize:vertical" placeholder="Paste what you find here, or type a brief summary."></textarea>
+          <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
+            <button class="btn btn-sm btn-blue" onclick="scoreFinding('${src.id}',${i})">Score this</button>
+            <span style="font-size:10px;color:var(--muted)">Updates: ${src.criteria.map(ci=>CRITERIA[ci]).join(', ')}</span>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <a href="${src.url(c)}" target="_blank" class="btn btn-sm btn-outline" style="text-decoration:none;white-space:nowrap">Open ${src.name.split(' ')[0]} ↗</a>
+        ${!finding?`<button class="btn btn-sm" onclick="toggleFinding('${src.id}')">Add notes</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleFinding(id) {
+  const el = document.getElementById('finding-'+id);
+  el.style.display = el.style.display==='none'?'block':'none';
+}
+
+function scoreFinding(srcId, srcIdx) {
+  const text = document.getElementById('text-'+srcId).value;
+  const src = RESEARCH_SOURCES[srcIdx];
+  const result = src.autoScore(text);
+  src.criteria.forEach((ci, j) => { currentResearch.scores[ci] = result.s[j]; });
+  currentResearch.findings[srcId] = { hint: result.h[0] };
+  renderSourceSteps();
+}
+
+function finishResearch() {
+  if(!currentResearch) return;
+  const sw = parseInt(document.getElementById('rSwitchInput').value);
+  currentResearch.scores[7] = sw;
+  const w = WEIGHTS[currentResearch.sector] || DEFAULT_W;
+  const score = +(currentResearch.scores.reduce((a,v,i) => a+v*w[i], 0)).toFixed(2);
+  const risk = score<4?'LOW':score<6.5?'MODERATE':'HIGH';
+  const entry = {
+    name: currentResearch.name, sector: currentResearch.sector,
+    scores: [.currentResearch.scores], score, risk,
+    sbti:'', vt:'', flag:'', action: document.getElementById('rKeyRiskInput').value
+  };
+  const existing = suppliers.findIndex(s => s.name.toLowerCase()===entry.name.toLowerCase());
+  if(existing>=0) suppliers[existing]=entry; else suppliers.push(entry);
+
+  document.getElementById('researchFlow').style.display='none';
+  document.getElementById('researchResult').style.display='block';
+  const rc = score<4?'#1a7a3c':score<6.5?'#b45a00':'#c0170f';
+  document.getElementById('researchResult').innerHTML=`
+    <div class="card" style="border-left:4px solid ${rc}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div>
+          <div style="font-size:16px;font-weight:800;color:var(--navy)">${entry.name}</div>
+          <div style="font-size:11px;color:var(--muted)">${entry.sector}: added to dashboard</div>
+        </div>
+        <div style="text-align:center;background:var(--surface);padding:12px 20px;border-radius:8px">
+          <div style="font-size:28px;font-weight:900;color:${rc}">${score}</div>
+          <div style="font-size:10px;color:var(--muted)">Risk Score</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px">
+        ${CRITERIA.map((c,i)=>`<div style="background:var(--surface);border-radius:6px;padding:8px;text-align:center;border:1px solid var(--border)">
+          <div style="font-size:9px;color:var(--muted);font-weight:700">${SHORT[i]}</div>
+          <div style="font-size:16px;font-weight:800;color:${scoreColor(entry.scores[i])}">${entry.scores[i]}</div>
+        </div>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-blue" onclick="renderDashboard();showPanel('dashboard',document.querySelector('.nav-btn'))">View Dashboard</button>
+        <button class="btn" onclick="resetResearch()">Research Another</button>
+      </div>
+    </div>`;
+  renderDashboard();
+}
+
+function resetResearch() {
+  currentResearch = null;
+  document.getElementById('researchInputCard').style.display = 'block';
+  document.getElementById('researchFlow').style.display = 'none';
+  document.getElementById('researchResult').style.display = 'none';
+  document.getElementById('rCompany').value = '';
+}
+
+/* ════════════════════════════════════════════
    SECTOR INTEL
    ════════════════════════════════════════════ */
 
 const SECTOR_CONTEXT = {
   "Safety-Critical": {
     regulatory: [
-      "EU General Safety Regulation II (GSR II) — mandatory ADAS on all trucks from 2024",
-      "FMVSS / CMVSS — Federal Motor Vehicle Safety Standards for brake & coupling systems",
-      "UNECE R13 — heavy vehicle braking regulation",
-      "Scope 3 Category 1 — Tier 1 brake/ADAS suppliers are PACCAR's largest indirect emissions source"
+      "EU General Safety Regulation II (GSR II): mandatory ADAS on all trucks from 2024",
+      "FMVSS / CMVSS: Federal Motor Vehicle Safety Standards for brake & coupling systems",
+      "UNECE R13: heavy vehicle braking regulation",
+      "Scope 3 Category 1: Tier 1 brake/ADAS suppliers are PACCAR's largest indirect emissions source"
     ],
     checklist: [
       "Does the supplier have SBTi Validated or Committed targets?",
       "Is brake/ADAS software OTA-updatable for EU GSR II compliance?",
       "Any Clean Air Act or EPA enforcement history?",
-      "Conflict minerals (cobalt, rare earths) in ADAS semiconductors — CMRT published?",
+      "Conflict minerals (cobalt, rare earths) in ADAS semiconductors: CMRT published?",
       "What is the switching timeline if this supplier fails? (Brakes = safety-critical lock-in)"
     ]
   },
   "Interiors": {
     regulatory: [
-      "EU End-of-Life Vehicles Directive (ELV) — 95% recyclability target by 2030",
-      "REACH Regulation — SVHCs in foam, adhesives, PVC plasticizers",
-      "VOC Emission Standards — interior cabin air quality requirements",
-      "EU CSDDD — mandatory supply chain due diligence from 2026"
+      "EU End-of-Life Vehicles Directive (ELV): 95% recyclability target by 2030",
+      "REACH Regulation: SVHCs in foam, adhesives, PVC plasticizers",
+      "VOC Emission Standards: interior cabin air quality requirements",
+      "EU CSDDD: mandatory supply chain due diligence from 2026"
     ],
     checklist: [
       "Does the supplier publish VOC emission rates for foam and trim materials?",
@@ -741,61 +996,61 @@ const SECTOR_CONTEXT = {
   },
   "Tires": {
     regulatory: [
-      "EU Deforestation Regulation (EUDR) — natural rubber traceability required by Dec 2025",
-      "UFLPA — Uyghur Forced Labor Prevention Act — SE Asia plantation supply chains at risk",
-      "CSRD / ESRS — mandatory sustainability reporting for large EU companies",
-      "TRWP (Tire and Road Wear Particles) — classified as financially material by Michelin 2024"
+      "EU Deforestation Regulation (EUDR): natural rubber traceability required by Dec 2025",
+      "UFLPA: Uyghur Forced Labor Prevention Act: SE Asia plantation supply chains at risk",
+      "CSRD / ESRS: mandatory sustainability reporting for large EU companies",
+      "TRWP (Tire and Road Wear Particles): classified as financially material by Michelin 2024"
     ],
     checklist: [
       "Does the supplier have an EUDR Due Diligence Statement (DDS) ready?",
       "Is natural rubber GPS-traceable to plantation level?",
       "GPSNR (Global Platform for Sustainable Natural Rubber) membership?",
       "Any forced labor risk in SE Asia rubber supply chain?",
-      "SBTi target — tire manufacturing is energy-intensive and Scope 3-heavy"
+      "SBTi target: tire manufacturing is energy-intensive and Scope 3-heavy"
     ]
   },
   "Coatings": {
     regulatory: [
-      "EPA TSCA Section 8(a)(7) — PFAS inventory reporting deadline Oct 2026",
-      "EU REACH PFAS Restriction — broad PFAS ban proposed across coatings sector",
-      "CAA Title V — major emitters (paint/coating facilities) require operating permits",
-      "OSHA 1910.94 — ventilation requirements for spray finishing operations"
+      "EPA TSCA Section 8(a)(7): PFAS inventory reporting deadline Oct 2026",
+      "EU REACH PFAS Restriction: broad PFAS ban proposed across coatings sector",
+      "CAA Title V: major emitters (paint/coating facilities) require operating permits",
+      "OSHA 1910.94: ventilation requirements for spray finishing operations"
     ],
     checklist: [
       "Has the supplier completed an EPA TSCA PFAS inventory?",
       "Any PFAS-containing products in the coating formulation?",
-      "Title V major source emitter status — any pending EPA deadlines?",
+      "Title V major source emitter status: any pending EPA deadlines?",
       "OSHA inspection history at spray finishing / paint facilities?",
       "Is a PFAS-free alternative product available or in development?"
     ]
   },
   "Electronics, Wiring & Sensors": {
     regulatory: [
-      "SEC Conflict Minerals Rule (Dodd-Frank 1502) — annual SD filing required",
-      "EU RoHS — restriction of hazardous substances in electronics",
-      "IATF 16949 — automotive quality management standard",
-      "Export controls — ITAR/EAR implications for ADAS sensor technology"
+      "SEC Conflict Minerals Rule (Dodd-Frank 1502): annual SD filing required",
+      "EU RoHS: restriction of hazardous substances in electronics",
+      "IATF 16949: automotive quality management standard",
+      "Export controls: ITAR/EAR implications for ADAS sensor technology"
     ],
     checklist: [
       "Is a full CMRT (Conflict Minerals Reporting Template) published annually?",
-      "3TG (tin, tantalum, tungsten, gold) smelter list — RMAP-certified?",
+      "3TG (tin, tantalum, tungsten, gold) smelter list: RMAP-certified?",
       "RoHS compliance documentation for all components?",
       "Any antitrust, price-fixing, or quality fraud history (e.g. Mitsubishi Electric)?",
-      "Wiring harness sole-source risk — what is the re-qualification timeline?"
+      "Wiring harness sole-source risk: what is the re-qualification timeline?"
     ]
   },
   "Fluids, Filtration & Emissions": {
     regulatory: [
-      "EPA Clean Air Act (CAA) — emissions aftertreatment compliance (SCR, DPF, EGR)",
-      "CARB (California Air Resources Board) — stricter NOx limits from 2024",
-      "EPA RCRA — hazardous waste management for used fluids and filter media",
-      "EU Stage V — off-road and heavy vehicle emissions standards"
+      "EPA Clean Air Act (CAA): emissions aftertreatment compliance (SCR, DPF, EGR)",
+      "CARB (California Air Resources Board): stricter NOx limits from 2024",
+      "EPA RCRA: hazardous waste management for used fluids and filter media",
+      "EU Stage V: off-road and heavy vehicle emissions standards"
     ],
     checklist: [
       "Any Clean Air Act enforcement history or consent decrees?",
-      "CARB-compliant product line — tested and certified for CA market?",
+      "CARB-compliant product line: tested and certified for CA market?",
       "Hazardous waste management plan for filter media and used oil?",
-      "SBTi target — emission system manufacturers are in PACCAR's Scope 3",
+      "SBTi target: emission system manufacturers are in PACCAR's Scope 3",
       "SCR/DPF product roadmap for BEV/FCEV transition (filtration still needed)?"
     ]
   }
@@ -825,12 +1080,12 @@ function renderSectorIntel(sector) {
     .sort((a, b) => b.avg - a.avg)
     .slice(0, 5);
 
-  // Common flags — flags appearing in 2+ suppliers
+  // Common flags: flags appearing in 2+ suppliers
   const flagCounts = {};
   ss.forEach(s => {
     if (!s.flag) return;
     const clean = s.flag.replace(/^[✅⚠🔴⛔🚨]\s*/,'').substring(0, 60);
-    const key = clean.split('—')[0].trim();
+    const key = clean.split(', ')[0].trim();
     flagCounts[key] = (flagCounts[key] || 0) + 1;
   });
   const commonFlags = Object.entries(flagCounts)
@@ -841,7 +1096,7 @@ function renderSectorIntel(sector) {
   const low  = ss.filter(s => calcWA(s) < 4).length;
   const mod  = ss.filter(s => calcWA(s) >= 4 && calcWA(s) < 6.5).length;
   const high = ss.filter(s => calcWA(s) >= 6.5).length;
-  const avgSector = ss.length ? (ss.reduce((a,s) => a + calcWA(s), 0) / ss.length).toFixed(1) : '—';
+  const avgSector = ss.length ? (ss.reduce((a,s) => a + calcWA(s), 0) / ss.length).toFixed(1) : ', ';
 
   document.getElementById('intelContent').innerHTML = `
     <!-- Sector header -->
@@ -899,7 +1154,7 @@ function renderSectorIntel(sector) {
             <div style="font-size:12px;color:var(--text);flex:1">${flag}</div>
             <span style="background:var(--red-bg);color:#c0170f;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;white-space:nowrap">${count} supplier${count>1?'s':''}</span>
           </div>`).join('') :
-          `<div style="font-size:12px;color:var(--muted);padding:8px">No common flags detected — good sector health.</div>`
+          `<div style="font-size:12px;color:var(--muted);padding:8px">No common flags detected: good sector health.</div>`
         }
         ${ss.length === 0 ? '<div style="font-size:12px;color:var(--muted);padding:8px">No suppliers scored in this sector yet.</div>' : ''}
       </div>
@@ -934,7 +1189,7 @@ function renderSectorIntel(sector) {
 
     <!-- Supplier list for this sector -->
     <div class="card">
-      <div class="card-title">All Scored Suppliers in ${sector} — ranked by risk</div>
+      <div class="card-title">All Scored Suppliers in ${sector}: ranked by risk</div>
       ${ss.length ? `<div style="display:grid;grid-template-columns:1fr 60px 80px 2fr;gap:12px;padding:6px 4px;border-bottom:2px solid var(--border);font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px">
         <span>Supplier</span><span>Score</span><span>Risk</span><span>Key Action</span>
       </div>
@@ -955,7 +1210,7 @@ function renderSectorIntel(sector) {
 }
 
 /* ════════════════════════════════════════════
-   REPORT UPLOAD — PDF / DOCX PARSER
+   REPORT UPLOAD: PDF / DOCX PARSER
    ════════════════════════════════════════════ */
 const SIGNALS = [
   {criterion:0,label:"ESG Disclosure",patterns:[
@@ -1036,7 +1291,7 @@ async function extractTextFromPDF(arrayBuffer){
     const page=await pdf.getPage(i);
     const content=await page.getTextContent();
     text+=content.items.map(item=>item.str).join(' ')+'\n';
-    setReportProgress(10+Math.round((i/pdf.numPages)*55),`Reading page ${i} of ${pdf.numPages}...`);
+    setReportProgress(10+Math.round((i/pdf.numPages)*55),`Reading page ${i} of ${pdf.numPages}.`);
   }
   return text;
 }
@@ -1082,31 +1337,31 @@ async function loadReport(e){
   if(!file)return;
   const ext=file.name.split('.').pop().toLowerCase();
   document.getElementById('reportModal').classList.add('show');
-  document.getElementById('reportModalTitle').textContent='Analysing: '+file.name;
-  document.getElementById('reportModalSub').textContent='Extracting text from document...';
+  document.getElementById('reportModalTitle').textContent='Reading: '+file.name;
+  document.getElementById('reportModalSub').textContent='Extracting text from document.';
   document.getElementById('reportSupplierInput').style.display='none';
   document.getElementById('reportProgress').style.display='block';
   document.getElementById('reportProgressBar').style.background='var(--navy)';
-  setReportProgress(5,'Reading file...');
+  setReportProgress(5,'Reading file.');
   try{
     const arrayBuffer=await file.arrayBuffer();
     let text='';
-    if(ext==='pdf'){setReportProgress(10,'Parsing PDF...');text=await extractTextFromPDF(arrayBuffer);}
-    else if(ext==='docx'||ext==='doc'){setReportProgress(30,'Parsing Word document...');text=await extractTextFromDOCX(arrayBuffer);setReportProgress(70,'Analysing content...');}
+    if(ext==='pdf'){setReportProgress(10,'Parsing PDF.');text=await extractTextFromPDF(arrayBuffer);}
+    else if(ext==='docx'||ext==='doc'){setReportProgress(30,'Parsing Word document.');text=await extractTextFromDOCX(arrayBuffer);setReportProgress(70,'Reading content.');}
     else throw new Error('Unsupported file type. Please upload PDF or DOCX.');
-    setReportProgress(85,'Scanning for sustainability signals...');
+    setReportProgress(85,'Checking for sustainability information.');
     const{suggestedScores,results,sbti,cdp,vt}=analyseText(text);
     const detectedName=detectSupplierName(text);
-    setReportProgress(100,'Analysis complete.');
+    setReportProgress(100,'Done.');
     document.getElementById('detectedName').textContent=detectedName||'Not detected';
     document.getElementById('reportSupplierName').value=detectedName;
     document.getElementById('reportModalSub').textContent=`Found signals in ${results.filter(r=>r.found.length>0).length} of 8 criteria`;
     const sectorSel=document.getElementById('reportSector');
-    sectorSel.innerHTML=[...new Set(suppliers.map(s=>s.sector))].sort().map(s=>`<option>${s}</option>`).join('');
+    sectorSel.innerHTML=[.new Set(suppliers.map(s=>s.sector))].sort().map(s=>`<option>${s}</option>`).join('');
     document.getElementById('reportSignals').innerHTML=results.map(r=>`
       <div class="signal-row">
         <div class="signal-label">${r.label}</div>
-        <div class="signal-found">${r.found.length?r.found.map(h=>`<span class="signal-badge sig-found">✓ ${h}</span>`).join(' '):'<span class="signal-badge sig-missing">No signal — default 5</span>'}</div>
+        <div class="signal-found">${r.found.length?r.found.map(h=>`<span class="signal-badge sig-found">✓ ${h}</span>`).join(' '):'<span class="signal-badge sig-missing">No signal: default 5</span>'}</div>
         <div style="font-size:10px;color:var(--muted)">→ <strong style="color:var(--navy)">${r.score}</strong></div>
       </div>`).join('');
     document.getElementById('reportScoreGrid').innerHTML=SIGNALS.map((sig,i)=>`
@@ -1147,7 +1402,7 @@ function saveReportSupplier(){
 function closeReportModal(){
   document.getElementById('reportModal').classList.remove('show');
   document.getElementById('reportProgress').style.display='block';
-  setReportProgress(0,'Extracting text...');
+  setReportProgress(0,'Extracting text.');
 }
 document.getElementById('reportModal').addEventListener('click',e=>{if(e.target===document.getElementById('reportModal'))closeReportModal();});
 
