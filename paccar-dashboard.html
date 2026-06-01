@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PACCAR Supplier Sustainability Risk Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -20,12 +21,11 @@
   --red:#c0170f;--red-bg:#fde8e7;--red-bd:#f5a8a5;
   --border:#dde3ef;--radius:10px;
 }
-body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+body{font-family:'Barlow',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 a{color:var(--navy-light);text-decoration:none}
-.header{display:flex;justify-content:space-between;align-items:center;padding:14px 28px;background:var(--navy);border-bottom:3px solid #c8a84b}
-.header-left{display:flex;align-items:center;gap:14px}
-.logo{font-size:20px;font-weight:900;color:#fff;letter-spacing:2px;border:2px solid rgba(255,255,255,0.35);padding:5px 12px;border-radius:4px}
-.logo-divider{width:1px;height:22px;background:rgba(255,255,255,0.2)}
+.header{display:flex;justify-content:space-between;align-items:center;padding:16px 32px;background:var(--navy);border-bottom:3px solid #C8A84B;box-shadow:0 2px 12px rgba(0,0,0,0.25)}
+.header-left{display:flex;align-items:center;gap:20px}
+.logo-divider{width:1px;height:40px;background:rgba(255,255,255,0.15)}
 .header-title{font-size:12px;color:rgba(255,255,255,0.85);font-weight:600}
 .header-sub{font-size:10px;color:rgba(255,255,255,0.5)}
 .breadcrumb{font-size:11px;color:rgba(255,255,255,0.5)}
@@ -38,20 +38,20 @@ a{color:var(--navy-light);text-decoration:none}
 .btn-blue:hover{background:var(--navy-dark)}
 .btn-outline{border-color:var(--navy);color:var(--navy);background:#fff}
 .btn-sm{padding:5px 12px;font-size:11px}
-.nav{display:flex;gap:2px;padding:0 28px;background:#fff;border-bottom:2px solid var(--border);box-shadow:0 2px 8px rgba(0,35,102,0.06)}
-.nav-btn{padding:11px 20px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:12px;font-weight:600;border-bottom:3px solid transparent;transition:all 0.15s;margin-bottom:-2px}
+.nav{display:flex;gap:2px;padding:0 32px;background:#fff;border-bottom:2px solid var(--border);box-shadow:0 2px 8px rgba(0,35,102,0.06)}
+.nav-btn{padding:11px 20px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:12px;font-weight:700;font-family:'Barlow Condensed',sans-serif;letter-spacing:0.8px;text-transform:uppercase;border-bottom:3px solid transparent;transition:all 0.15s;margin-bottom:-2px}
 .nav-btn:hover{color:var(--navy)}
-.nav-btn.active{color:var(--navy);border-bottom-color:var(--navy);background:var(--blue-dim)}
+.nav-btn.active{color:var(--navy);border-bottom-color:#C8A84B;background:var(--blue-dim)}
 .main{max-width:1280px;margin:0 auto;padding:20px 28px}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
 .card{background:var(--card);border-radius:var(--radius);padding:18px;border:1px solid var(--border);margin-bottom:14px;box-shadow:0 1px 4px rgba(0,35,102,0.06)}
-.card-title{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:10px}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;letter-spacing:0.5px;text-transform:uppercase;color:var(--navy);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--border);padding-bottom:10px}
 .panel{display:none}.panel.active{display:block}
 .metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px}
 .m-card{background:var(--card);border-radius:var(--radius);padding:14px 16px;border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,35,102,0.06);border-top:3px solid var(--navy)}
-.m-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:600}
-.m-val{font-size:26px;font-weight:800;margin:4px 0 2px;color:var(--navy)}
+.m-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.m-val{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:900;margin:4px 0 2px;color:var(--navy)}
 .m-sub{font-size:10px;color:var(--dim)}
 .sector-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
 .sector-card{background:var(--card);border-radius:var(--radius);padding:14px;border:1px solid var(--border);cursor:pointer;transition:all 0.15s;border-left:4px solid var(--navy);box-shadow:0 1px 4px rgba(0,35,102,0.06)}
@@ -99,7 +99,7 @@ a{color:var(--navy-light);text-decoration:none}
 .upload-hint{font-size:11px;color:rgba(255,255,255,0.65)}
 .upload-status{font-size:11px;padding:4px 12px;border-radius:20px;background:var(--green-bg);color:var(--green);font-weight:600;display:none}
 .upload-status.error{background:var(--red-bg);color:var(--red)}
-.footer{text-align:center;padding:16px;font-size:10px;color:var(--dim);border-top:2px solid var(--border);margin-top:20px;background:#fff}
+.footer{text-align:center;padding:16px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--dim);border-top:3px solid #C8A84B;margin-top:20px;background:var(--navy);color:rgba(255,255,255,0.4)}
 .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,23,68,0.6);z-index:100;align-items:center;justify-content:center}
 .modal-overlay.show{display:flex}
 .modal{background:var(--card);border-radius:12px;padding:24px;width:680px;max-height:85vh;overflow-y:auto;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,35,102,0.2)}
@@ -134,21 +134,25 @@ a{color:var(--navy-light);text-decoration:none}
 
 <div class="header">
   <div class="header-left">
-    <div class="logo">PACCAR</div>
+    <!-- PACCAR Logo wordmark -->
+    <div style="display:flex;flex-direction:column;align-items:flex-start;gap:0px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:32px;color:#fff;letter-spacing:6px;line-height:1;text-transform:uppercase;border-bottom:3px solid #C8A84B;padding-bottom:3px">PACCAR</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;color:#C8A84B;letter-spacing:3px;text-transform:uppercase;margin-top:4px">Inc.</div>
+    </div>
     <div class="logo-divider"></div>
     <div>
-      <div class="header-title">Supplier Sustainability Risk Platform</div>
-      <div class="header-sub">Team Hopper · Seattle University · 2026</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;color:#fff;letter-spacing:1px;text-transform:uppercase">Supplier Sustainability Risk Platform</div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:2px;letter-spacing:0.5px">Purchasing &amp; Supply Chain Sustainability · Internal Use Only</div>
     </div>
   </div>
   <div id="breadcrumb" class="breadcrumb"></div>
   <div class="header-right">
-    <label class="btn" style="cursor:pointer">
+    <label class="btn" style="cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:0.5px">
       Import Excel
       <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" onchange="loadExcel(event)">
     </label>
-    <label class="btn btn-blue" style="cursor:pointer">
-      📄 Upload Report
+    <label class="btn btn-blue" style="cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:0.5px">
+      Upload Report
       <input type="file" id="reportInput" accept=".pdf,.docx,.doc" style="display:none" onchange="loadReport(event)">
     </label>
     <div class="upload-status" id="uploadStatus"></div>
@@ -295,7 +299,7 @@ a{color:var(--navy-light);text-decoration:none}
   </div>
 </div>
 
-<div class="footer">PACCAR Supplier Sustainability Risk Platform · Team Hopper · Seattle University · 2026 · Scale 1 to 10 (higher = more risk)</div>
+<div class="footer">PACCAR Inc. · Supplier Sustainability Risk Platform · Purchasing &amp; Supply Chain Sustainability · Internal Use Only · Scale 1 to 10 (higher = more risk)</div>
 
 <!-- Report Upload Modal -->
 <div class="modal-overlay" id="reportModal">
@@ -800,7 +804,7 @@ const RESEARCH_SOURCES = [
       return {s,h};
     }},
   { id:"osha", name:"OSHA Enforcement", desc:"Workplace safety inspections, citations, penalties and fatalities",
-    url: c => `https://www.osha.gov/cgi-bin/est/est1?establishment=${encodeURIComponent(c)}&state=0&naics=&p_start=&p_finish=0&p_sort=10&p_desc=DESC&p_direction=Next&p_show=20`,
+    url: c => `https://www.osha.gov/pls/imis/establishment.search?p_logger=1&establishment=${encodeURIComponent(c)}&State=All&officetype=all&p_start=&p_finish=0&p_sort=10&p_desc=DESC&p_direction=Next&p_show=20`,
     criteria:[1], autoScore: t => {
       if(/fatal|death|killed/i.test(t)) return {s:[8],h:["Fatality on record"]};
       if(/willful/i.test(t)) return {s:[7],h:["Willful violations"]};
@@ -824,7 +828,7 @@ const RESEARCH_SOURCES = [
       return {s:[6],h:["Not listed on SBTi"]};
     }},
   { id:"sec", name:"SEC EDGAR (Conflict Minerals)", desc:"Annual SD filings, CMRT, 3TG traceability disclosures",
-    url: c => `https://efts.sec.gov/LATEST/search-index?q=%22${encodeURIComponent(c)}%22&forms=SD&dateRange=custom&startdt=2020-01-01`,
+    url: c => `https://efts.sec.gov/LATEST/search-index?q=%22${encodeURIComponent(c)}%22&forms=SD`,
     criteria:[4], autoScore: t => {
       if(/cmrt.*publish|full traceability|rmap/i.test(t)) return {s:[2],h:["Full CMRT published"]};
       if(/cmrt|sd filing/i.test(t)) return {s:[4],h:["CMRT filed"]};
