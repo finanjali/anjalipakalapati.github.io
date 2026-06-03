@@ -241,8 +241,8 @@ a{color:var(--navy-light);text-decoration:none}
         <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
             <div>
-              <label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">Key risk summary (one line)</label>
-              <input type="text" id="rKeyRiskInput" placeholder="e.g. No SBTi, CDP B, $2M OSHA penalty" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:12px;color:var(--navy)">
+              <label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">Key summary (one line)</label>
+              <input type="text" id="rKeySummaryInput" placeholder="e.g. No SBTi, CDP B, $2M OSHA penalty" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:12px;color:var(--navy)">
             </div>
             <div>
               <label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">Switching cost (1-10)</label>
@@ -343,13 +343,13 @@ a{color:var(--navy-light);text-decoration:none}
       </div>
 
       <div style="margin-bottom:14px">
-        <div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:10px">Suggested Scores: review and adjust before saving (1 = low risk, 10 = high risk)</div>
+        <div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:10px">Suggested Scores: review and adjust before saving (1 = lowest, 10 = highest)</div>
         <div id="reportScoreGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"></div>
       </div>
 
       <div style="margin-bottom:14px">
         <label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">Key Risk Summary (one line)</label>
-        <input type="text" id="reportKeyRisk" placeholder="e.g. No SBTi commitment, CDP B only" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:12px;color:var(--navy)">
+        <input type="text" id="reportKeySummary" placeholder="e.g. No SBTi commitment, CDP B only" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:12px;color:var(--navy)">
       </div>
 
       <div style="display:flex;gap:8px;justify-content:flex-end">
@@ -439,7 +439,7 @@ let suppliers = [
   {name:"Voss Fluid",sector:"Fluids, Filtration & Emissions",scores:[5,4,4,5,3,5,3,4],score:4.24,risk:"MODERATE",sbti:"None",vt:"No records",flag:"⚠ No ESG ratings: zero third-party assessment.",action:"Send supplier questionnaire. Request sustainability disclosure."},
   {name:"Sogefi Filtration",sector:"Fluids, Filtration & Emissions",scores:[4,3,4,4,5,5,3,7],score:4.40,risk:"MODERATE",sbti:"None",vt:"Minimal",flag:"⚠ Switching cost 7 + no SBTi + limited disclosure.",action:"Request ESG disclosure and SBTi commitment timeline."},
   {name:"Phillips & Temro Industries",sector:"Fluids, Filtration & Emissions",scores:[7,5,5,6,6,6,3,8],score:5.65,risk:"MODERATE",sbti:"None",vt:"Minimal",flag:"🔴 Highest risk in fluids sector. ESG 7, switching 8, zero ratings.",action:"URGENT: Send full questionnaire. Switching cost 8 makes this a priority."},
-  // Powertrain & Driveline (from Dynamic Scoring Model, scores mapped to 1-10 risk scale)
+  // Powertrain & Driveline (from Dynamic Scoring Model)
   {name:"Dana Corporation (Powertrain)",sector:"Powertrain & Driveline",scores:[2,4,4,2,4,5,4,5],score:3.48,risk:"LOW",sbti:"Committed",vt:"$2.5M+ group",flag:"Scope 3 and PCF data gap. ISO 14001 and 45001 certified. Strong renewable energy progress.",action:"Request Scope 3 product-level data and carbon footprint documentation for driveline components."},
   {name:"AAM (American Axle)",sector:"Powertrain & Driveline",scores:[2,2,4,2,4,7,2,5],score:3.54,risk:"LOW",sbti:"None",vt:"No major records",flag:"Scope 3 and PCF gap. Strong safety record. ISO 14001 certified across major sites.",action:"Request SBTi commitment timeline and product carbon footprint for EV driveline components."},
   {name:"Cummins (Powertrain)",sector:"Powertrain & Driveline",scores:[2,6,5,4,4,4,6,7],score:4.38,risk:"MODERATE",sbti:"Validated",vt:"$4.19B group (CAA penalty)",flag:"Safety and governance gap on record. $1.675B Clean Air Act penalty 2024. BEV products positive.",action:"Request facility-level emissions data and CAA consent decree remediation timeline."},
@@ -492,8 +492,8 @@ function renderMetrics() {
   const sectors=getSectors().length;
   document.getElementById('metricsBar').innerHTML=`
     <div class="m-card"><div class="m-label">Total Suppliers</div><div class="m-val" style="color:var(--blue)">${suppliers.length}</div><div class="m-sub">${sectors} sectors</div></div>
-    <div class="m-card"><div class="m-label">Low Risk</div><div class="m-val" style="color:var(--green)">${low}</div><div class="m-sub">Score &lt; 4.0</div></div>
-    <div class="m-card"><div class="m-label">Moderate Risk</div><div class="m-val" style="color:var(--amber)">${mod}</div><div class="m-sub">Score 4.0 to 6.4</div></div>
+    <div class="m-card"><div class="m-label">Low</div><div class="m-val" style="color:var(--green)">${low}</div><div class="m-sub">Score &lt; 4.0</div></div>
+    <div class="m-card"><div class="m-label">Moderate</div><div class="m-val" style="color:var(--amber)">${mod}</div><div class="m-sub">Score 4.0 to 6.4</div></div>
     <div class="m-card"><div class="m-label">High Score</div><div class="m-val" style="color:var(--red)">${high}</div><div class="m-sub">Score ≥ 6.5</div></div>
     <div class="m-card"><div class="m-label">Portfolio Avg</div><div class="m-val" style="color:var(--navy)">${avg}</div><div class="m-sub">Weighted avg score</div></div>`;
 }
@@ -512,7 +512,7 @@ function renderDashboard() {
     return `<div class="sector-card" onclick="drillSector('${sec}')">
       <div class="sc-name">${sec}</div>
       <div class="sc-count">${ss.length}</div>
-      <div class="sc-meta" style="color:${col}">Avg: ${avg}${high?' · '+high+' high risk':''}</div>
+      <div class="sc-meta" style="color:${col}">Avg: ${avg}${high?' · '+high+' high':''}</div>
     </div>`;
   }).join('');
 
@@ -523,7 +523,7 @@ function renderDashboard() {
   destroyChart('chartDoughnut');
   chartInstances.chartDoughnut = new Chart(document.getElementById('chartDoughnut'),{
     type:'doughnut',
-    data:{labels:['Low Risk','Moderate Risk','High Score'],datasets:[{data:[low,mod,high],backgroundColor:['#1a7a3c','#b45a00','#c0170f'],borderWidth:0,hoverOffset:6}]},
+    data:{labels:['Low','Moderate','High'],datasets:[{data:[low,mod,high],backgroundColor:['#1a7a3c','#b45a00','#c0170f'],borderWidth:0,hoverOffset:6}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{color:'#5a6a8a',font:{size:11},padding:12}}}}
   });
 
@@ -536,7 +536,7 @@ function renderDashboard() {
     options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{grid:{color:'rgba(0,35,102,0.06)'},ticks:{color:'#5a6a8a',font:{size:10}},max:10},y:{grid:{display:false},ticks:{color:'#1a2340',font:{size:10}}}},plugins:{legend:{display:false}}}
   });
 
-  // Top 10 risk
+  // Top 10 by score
   const top10=[...suppliers].sort((a,b)=>calcWA(b)-calcWA(a)).slice(0,10);
   destroyChart('chartTopRisk');
   chartInstances.chartTopRisk = new Chart(document.getElementById('chartTopRisk'),{
@@ -576,7 +576,7 @@ function renderHeatmap(filter='all') {
 
   let html='<tr><th>Supplier</th><th>Sector</th>';
   SHORT.forEach(s=>{html+=`<th>${s}</th>`});
-  html+='<th>Score</th><th>Risk</th></tr>';
+  html+='<th>Score</th><th>Level</th></tr>';
 
   sorted.forEach(s=>{
     const wa=calcWA(s);
@@ -627,9 +627,9 @@ function drillSector(sec) {
       <span style="font-size:11px;color:var(--muted)">${ss.length} suppliers</span>
     </div>
   </div>
-  <div class="card"><div class="card-title">Risk Heatmap</div><div style="overflow-x:auto"><table class="heatmap"><tr><th>Supplier</th>`;
+  <div class="card"><div class="card-title">Score Heatmap</div><div style="overflow-x:auto"><table class="heatmap"><tr><th>Supplier</th>`;
   SHORT.forEach(s=>{html+=`<th>${s}</th>`});
-  html+='<th>Score</th><th>Risk</th></tr>';
+  html+='<th>Score</th><th>Level</th></tr>';
   ss.sort((a,b)=>calcWA(b)-calcWA(a)).forEach(s=>{
     const wa=calcWA(s),rc=riskColor(s.risk||(wa<4?'LOW':wa<6.5?'MODERATE':'HIGH'));
     html+=`<tr><td class="name-cell" onclick="showDetail('${s.name.replace(/'/g,"\\'")}')">${s.name}</td>`;
@@ -654,7 +654,7 @@ function renderTiering() {
   destroyChart('chartTierBar');
   chartInstances.chartTierBar = new Chart(document.getElementById('chartTierBar'),{
     type:'bar',
-    data:{labels:['Tier 1: Low Risk','Tier 2: Monitor','Tier 3: High Score'],datasets:[{data:[t1.length,t2.length,t3.length],backgroundColor:['#1a7a3c','#b45a00','#c0170f'],borderRadius:6,barThickness:50}]},
+    data:{labels:['Tier 1: Low','Tier 2: Monitor','Tier 3: High'],datasets:[{data:[t1.length,t2.length,t3.length],backgroundColor:['#1a7a3c','#b45a00','#c0170f'],borderRadius:6,barThickness:50}]},
     options:{responsive:true,maintainAspectRatio:false,scales:{y:{grid:{color:'rgba(0,35,102,0.06)'},ticks:{color:'#5a6a8a'}},x:{grid:{display:false},ticks:{color:'#1a2340',font:{size:11}}}},plugins:{legend:{display:false}}}
   });
 
@@ -673,7 +673,7 @@ function renderTiering() {
   });
 
   let html='';
-  [{tier:3,label:'Tier 3: High Score (≥ 6.5)',cls:'badge-high',items:t3},{tier:2,label:'Tier 2: Monitor (4.0 to 6.4)',cls:'badge-mod',items:t2},{tier:1,label:'Tier 1: Low Risk (< 4.0)',cls:'badge-low',items:t1}].forEach(({label,cls,items})=>{
+  [{tier:3,label:'Tier 3: High (≥ 6.5)',cls:'badge-high',items:t3},{tier:2,label:'Tier 2: Monitor (4.0 to 6.4)',cls:'badge-mod',items:t2},{tier:1,label:'Tier 1: Low Risk (< 4.0)',cls:'badge-low',items:t1}].forEach(({label,cls,items})=>{
     html+=`<div class="card"><div class="card-title">${label} <span class="badge ${cls}">${items.length}</span></div>`;
     if(!items.length){html+='<div style="font-size:12px;color:var(--dim);padding:8px">None</div>'}
     items.sort((a,b)=>calcWA(b)-calcWA(a)).forEach(s=>{
@@ -699,11 +699,26 @@ function renderAnomalies() {
     });
   });
   document.getElementById('anomalyCount').textContent = flags.length;
-  document.getElementById('anomalyList').innerHTML = flags.length?flags.map(f=>
-    `<div class="anomaly-card" onclick="showDetail('${f.sname.replace(/'/g,"\\'")}')">
-      <div><span style="font-weight:700;color:#7f1d1d">${f.supplier}</span><span style="margin-left:8px;color:#b91c1c;font-size:11px">${f.criterion}</span></div>
-      <div style="font-size:20px;font-weight:800;color:#c0170f">${f.score}</div>
-    </div>`).join(''):'<div style="padding:12px;font-size:12px;color:var(--dim)">No critical anomalies</div>';
+  document.getElementById('anomalyList').innerHTML = flags.length?flags.map(f=>{
+    const s = suppliers.find(x=>x.name===f.supplier);
+    const level = s ? (s.risk||'MODERATE') : 'MODERATE';
+    const lvlColor = level==='LOW'?'#1a7a3c':level==='HIGH'?'#c0170f':'#b45a00';
+    const lvlBg = level==='LOW'?'#e8f5ee':level==='HIGH'?'#fde8e7':'#fef3e2';
+    return `<div class="anomaly-card" style="cursor:default">
+      <div style="flex:1">
+        <span style="font-weight:700;color:#7f1d1d;cursor:pointer" onclick="showDetail('${f.sname.replace(/'/g,"\\'")}')">${f.supplier}</span>
+        <span style="margin-left:8px;color:#b91c1c;font-size:11px">${f.criterion}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <select onchange="changeLevel('${f.sname.replace(/'/g,"\\'")}',this)" style="padding:4px 8px;border-radius:6px;border:1px solid #f5a8a5;font-size:11px;font-weight:700;color:${lvlColor};background:${lvlBg};cursor:pointer">
+          <option value="LOW" ${level==='LOW'?'selected':''}>LOW</option>
+          <option value="MODERATE" ${level==='MODERATE'?'selected':''}>MODERATE</option>
+          <option value="HIGH" ${level==='HIGH'?'selected':''}>HIGH</option>
+        </select>
+        <div style="font-size:20px;font-weight:800;color:#c0170f">${f.score}</div>
+      </div>
+    </div>`;
+  }).join(''):'<div style="padding:12px;font-size:12px;color:var(--dim)">No critical anomalies</div>';
 
   let combos=[];
   suppliers.forEach(s=>{
@@ -757,19 +772,31 @@ function showDetail(name) {
     </div>`;
   document.getElementById('detailModal').classList.add('show');
 }
+function changeLevel(name, sel) {
+  const s = suppliers.find(x=>x.name===name);
+  if(!s) return;
+  s.risk = sel.value;
+  const col = s.risk==='LOW'?'#1a7a3c':s.risk==='HIGH'?'#c0170f':'#b45a00';
+  const bg  = s.risk==='LOW'?'#e8f5ee':s.risk==='HIGH'?'#fde8e7':'#fef3e2';
+  sel.style.color = col; sel.style.background = bg;
+  // Refresh metrics bar and charts
+  renderMetrics();
+  // If tiering panel visible, refresh it
+  if(document.getElementById('p-tiering').classList.contains('active')) renderTiering();
+  // If heatmap visible, refresh it
+  if(document.getElementById('p-heatmap').classList.contains('active')) renderHeatmap('all');
+  // If dashboard visible, refresh dashboard charts
+  if(document.getElementById('p-dashboard').classList.contains('active')) renderDashboard();
+}
+
 function updateSupplierLevel() {
   if(!_currentDetailName) return;
+  const sel = document.getElementById('modalLevelSelect');
+  changeLevel(_currentDetailName, sel);
   const s = suppliers.find(x=>x.name===_currentDetailName);
   if(!s) return;
-  const sel = document.getElementById('modalLevelSelect');
-  s.risk = sel.value;
-  sel.style.color = s.risk==='LOW'?'#1a7a3c':s.risk==='HIGH'?'#c0170f':'#b45a00';
-  sel.style.background = s.risk==='LOW'?'#e8f5ee':s.risk==='HIGH'?'#fde8e7':'#fef3e2';
-  // Refresh badge in modal
   const badge = document.getElementById('modalLevelBadge');
   if(badge) { badge.textContent=s.risk; badge.className='badge '+riskBadge(s.risk); }
-  // Refresh dashboard metrics silently
-  renderMetrics();
 }
 function closeModal() { document.getElementById('detailModal').classList.remove('show'); }
 document.getElementById('detailModal').addEventListener('click', e=>{ if(e.target===document.getElementById('detailModal')) closeModal(); });
@@ -956,7 +983,7 @@ function finishResearch() {
   const entry = {
     name: currentResearch.name, sector: currentResearch.sector,
     scores: [...currentResearch.scores], score, risk,
-    sbti:'', vt:'', flag:'', action: document.getElementById('rKeyRiskInput').value
+    sbti:'', vt:'', flag:'', action: document.getElementById('rKeySummaryInput').value
   };
   const existing = suppliers.findIndex(s => s.name.toLowerCase()===entry.name.toLowerCase());
   if(existing>=0) suppliers[existing]=entry; else suppliers.push(entry);
@@ -1165,7 +1192,7 @@ function renderSectorIntel(sector) {
     <div class="grid-2">
       <!-- Top 5 criteria risks -->
       <div class="card">
-        <div class="card-title">Top 5 Risk Criteria in ${sector}</div>
+        <div class="card-title">Top 5 Criteria by Score in ${sector}</div>
         ${ranked.map((r, i) => {
           const col = r.avg < 4 ? '#1a7a3c' : r.avg < 6.5 ? '#b45a00' : '#c0170f';
           const pct = Math.round(r.avg / 10 * 100);
@@ -1187,7 +1214,7 @@ function renderSectorIntel(sector) {
 
       <!-- Common flags -->
       <div class="card">
-        <div class="card-title">Recurring Risk Themes Across Suppliers</div>
+        <div class="card-title">Recurring Themes Across Suppliers</div>
         ${commonFlags.length ? commonFlags.map(([flag, count]) => `
           <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);gap:12px">
             <div style="font-size:12px;color:var(--text);flex:1">${flag}</div>
@@ -1202,7 +1229,7 @@ function renderSectorIntel(sector) {
     <div class="grid-2">
       <!-- Regulatory context -->
       <div class="card">
-        <div class="card-title">Key Regulatory Risks for ${sector}</div>
+        <div class="card-title">Key Regulatory Context for ${sector}</div>
         ${ctx.regulatory.length ? ctx.regulatory.map(r => `
           <div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);align-items:flex-start">
             <span style="color:var(--navy);font-size:14px;flex-shrink:0">⚖️</span>
@@ -1228,9 +1255,9 @@ function renderSectorIntel(sector) {
 
     <!-- Supplier list for this sector -->
     <div class="card">
-      <div class="card-title">All Scored Suppliers in ${sector}: ranked by risk</div>
+      <div class="card-title">All Scored Suppliers in ${sector}: ranked by score</div>
       ${ss.length ? `<div style="display:grid;grid-template-columns:1fr 60px 80px 2fr;gap:12px;padding:6px 4px;border-bottom:2px solid var(--border);font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px">
-        <span>Supplier</span><span>Score</span><span>Risk</span><span>Key Action</span>
+        <span>Supplier</span><span>Score</span><span>Level</span><span>Key Action</span>
       </div>
       ${ss.sort((a,b) => calcWA(b)-calcWA(a)).map(s => {
         const wa = calcWA(s);
@@ -1408,7 +1435,7 @@ async function loadReport(e){
         <div style="font-size:9px;color:var(--muted);font-weight:700;margin-bottom:6px">${sig.label}</div>
         <input class="score-input" type="number" id="rs${i}" min="1" max="10" value="${suggestedScores[i]}">
       </div>`).join('');
-    document.getElementById('reportKeyRisk').value=[sbti!=='None'?'SBTi '+sbti:'No SBTi',cdp?'CDP '+cdp:'No CDP',vt].filter(Boolean).join(' · ');
+    document.getElementById('reportKeySummary').value=[sbti!=='None'?'SBTi '+sbti:'No SBTi',cdp?'CDP '+cdp:'No CDP',vt].filter(Boolean).join(' · ');
     window._reportMeta={sbti,vt,cdp};
     setTimeout(()=>{document.getElementById('reportProgress').style.display='none';document.getElementById('reportSupplierInput').style.display='block';},600);
   }catch(err){
@@ -1421,7 +1448,7 @@ async function loadReport(e){
 function saveReportSupplier(){
   const name=document.getElementById('reportSupplierName').value.trim();
   const sector=document.getElementById('reportSector').value;
-  const keyRisk=document.getElementById('reportKeyRisk').value.trim();
+  const keySummary=document.getElementById('reportKeySummary').value.trim();
   if(!name){alert('Please enter a supplier name.');return;}
   const scores=SIGNALS.map((_,i)=>{const v=parseInt(document.getElementById('rs'+i).value);return isNaN(v)?5:Math.min(10,Math.max(1,v));});
   const w=WEIGHTS[sector]||DEFAULT_W;
