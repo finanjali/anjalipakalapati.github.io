@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PACCAR Supplier Sustainability Risk Platform</title>
+<title>PACCAR Supplier Sustainability Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -147,7 +147,7 @@ a{color:var(--navy-light);text-decoration:none}
     </a>
     <div class="logo-divider"></div>
     <div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;color:#fff;letter-spacing:1px;text-transform:uppercase">Supplier Sustainability Risk Platform</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;color:#fff;letter-spacing:1px;text-transform:uppercase">Supplier Sustainability Platform</div>
       <div style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:2px;letter-spacing:0.5px">Purchasing &amp; Supply Chain Sustainability · Internal Use Only</div>
     </div>
   </div>
@@ -167,7 +167,6 @@ a{color:var(--navy-light);text-decoration:none}
 
 <div class="nav">
   <button class="nav-btn active" onclick="showPanel('dashboard',this)">Dashboard</button>
-  <button class="nav-btn" onclick="showPanel('sectors',this)">Sectors</button>
   <button class="nav-btn" onclick="showPanel('sectorintel',this)">Sector Intel</button>
   <button class="nav-btn" onclick="showPanel('heatmap',this)">Heatmap</button>
   <button class="nav-btn" onclick="showPanel('tiering',this)">Tiering</button>
@@ -180,7 +179,7 @@ a{color:var(--navy-light);text-decoration:none}
     <span style="font-size:12px;font-weight:700;color:#fff">📂 Data Source</span>
     <span class="upload-hint">Upload a <strong style="color:#fff">Suppliers</strong> sheet Excel to refresh all data &mdash; <a href="#" onclick="toggleFormat();return false" style="color:#c8d8ff">view column format</a></span>
     <div id="formatHint" style="display:none;font-size:10px;color:rgba(255,255,255,0.6);width:100%;margin-top:4px">
-      Required columns: Supplier · Segment · ESG · Human Rights · Haz Waste · Energy · Conflict Min · CO2 · Defective Parts · Switch Cost · Weighted Score · Risk Level · SBTi · Violation Tracker · Flag · Action
+      Required columns: Supplier · Segment · ESG · Human Rights · Haz Waste · Energy · Conflict Min · CO2 · Defective Parts · Switch Cost · Weighted Score · Level · SBTi · Violation Tracker · Flag · Action
     </div>
   </div>
 
@@ -190,10 +189,10 @@ a{color:var(--navy-light);text-decoration:none}
   <div class="panel active" id="p-dashboard">
     <div class="sector-grid" id="sectorCards"></div>
     <div class="grid-2">
-      <div class="card"><div class="card-title">Risk Level Distribution</div><div class="chart-sm"><canvas id="chartDoughnut"></canvas></div></div>
-      <div class="card"><div class="card-title">Average Risk Score by Sector</div><div class="chart-sm"><canvas id="chartSectorBars"></canvas></div></div>
+      <div class="card"><div class="card-title">Level Distribution</div><div class="chart-sm"><canvas id="chartDoughnut"></canvas></div></div>
+      <div class="card"><div class="card-title">Average Score by Sector</div><div class="chart-sm"><canvas id="chartSectorBars"></canvas></div></div>
     </div>
-    <div class="card"><div class="card-title">Top 10 Highest-Risk Suppliers</div><div class="chart-box"><canvas id="chartTopRisk"></canvas></div></div>
+    <div class="card"><div class="card-title">Top 10 Highest-Scoring Suppliers</div><div class="chart-box"><canvas id="chartTopRisk"></canvas></div></div>
     <div class="card"><div class="card-title">Criterion Score Breakdown: Safety-Critical vs Interiors avg</div><div class="chart-sm"><canvas id="chartRadar"></canvas></div></div>
   </div>
 
@@ -288,7 +287,7 @@ a{color:var(--navy-light);text-decoration:none}
   <div class="panel" id="p-tiering">
     <div class="grid-2">
       <div class="card"><div class="card-title">Tier Distribution</div><div class="chart-sm"><canvas id="chartTierBar"></canvas></div></div>
-      <div class="card"><div class="card-title">Risk Score vs Switching Cost</div><div class="chart-sm"><canvas id="chartBubble"></canvas></div></div>
+      <div class="card"><div class="card-title">Score vs Switching Cost</div><div class="chart-sm"><canvas id="chartBubble"></canvas></div></div>
     </div>
     <div id="tierLists"></div>
   </div>
@@ -296,7 +295,7 @@ a{color:var(--navy-light);text-decoration:none}
   <!-- ANOMALIES -->
   <div class="panel" id="p-anomalies">
     <div class="card"><div class="card-title">Critical Score Anomalies (score ≥ 7) <span class="badge badge-high" id="anomalyCount">0</span></div><div id="anomalyList"></div></div>
-    <div class="card"><div class="card-title">High Risk + High Switching Cost Combinations</div><div id="comboList"></div></div>
+    <div class="card"><div class="card-title">High Score + High Switching Cost Combinations</div><div id="comboList"></div></div>
   </div>
 
   <!-- PROFILE (overlay panel) -->
@@ -305,7 +304,7 @@ a{color:var(--navy-light);text-decoration:none}
   </div>
 </div>
 
-<div class="footer">PACCAR Inc. · Supplier Sustainability Risk Platform · Purchasing &amp; Supply Chain Sustainability · Internal Use Only · Scale 1 to 10 (higher = more risk)</div>
+<div class="footer">PACCAR Inc. · Supplier Sustainability Platform · Purchasing &amp; Supply Chain Sustainability · Internal Use Only · Scale 1 to 10 (higher score = greater attention needed)</div>
 
 <!-- Report Upload Modal -->
 <div class="modal-overlay" id="reportModal">
@@ -366,7 +365,14 @@ a{color:var(--navy-light);text-decoration:none}
   <div class="modal">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <h2 id="modalSupplierName" style="margin:0"></h2>
-      <button class="btn btn-sm" onclick="closeModal()">✕ Close</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select id="modalLevelSelect" onchange="updateSupplierLevel()" style="padding:6px 12px;border-radius:6px;border:1px solid var(--border);font-size:12px;font-weight:700;color:var(--navy);cursor:pointer">
+          <option value="LOW">LOW</option>
+          <option value="MODERATE">MODERATE</option>
+          <option value="HIGH">HIGH</option>
+        </select>
+        <button class="btn btn-sm" onclick="closeModal()">✕ Close</button>
+      </div>
     </div>
     <div id="modalContent"></div>
   </div>
@@ -488,7 +494,7 @@ function renderMetrics() {
     <div class="m-card"><div class="m-label">Total Suppliers</div><div class="m-val" style="color:var(--blue)">${suppliers.length}</div><div class="m-sub">${sectors} sectors</div></div>
     <div class="m-card"><div class="m-label">Low Risk</div><div class="m-val" style="color:var(--green)">${low}</div><div class="m-sub">Score &lt; 4.0</div></div>
     <div class="m-card"><div class="m-label">Moderate Risk</div><div class="m-val" style="color:var(--amber)">${mod}</div><div class="m-sub">Score 4.0 to 6.4</div></div>
-    <div class="m-card"><div class="m-label">High Risk</div><div class="m-val" style="color:var(--red)">${high}</div><div class="m-sub">Score ≥ 6.5</div></div>
+    <div class="m-card"><div class="m-label">High Score</div><div class="m-val" style="color:var(--red)">${high}</div><div class="m-sub">Score ≥ 6.5</div></div>
     <div class="m-card"><div class="m-label">Portfolio Avg</div><div class="m-val" style="color:var(--navy)">${avg}</div><div class="m-sub">Weighted avg score</div></div>`;
 }
 
@@ -517,7 +523,7 @@ function renderDashboard() {
   destroyChart('chartDoughnut');
   chartInstances.chartDoughnut = new Chart(document.getElementById('chartDoughnut'),{
     type:'doughnut',
-    data:{labels:['Low Risk','Moderate Risk','High Risk'],datasets:[{data:[low,mod,high],backgroundColor:['#1a7a3c','#b45a00','#c0170f'],borderWidth:0,hoverOffset:6}]},
+    data:{labels:['Low Risk','Moderate Risk','High Score'],datasets:[{data:[low,mod,high],backgroundColor:['#1a7a3c','#b45a00','#c0170f'],borderWidth:0,hoverOffset:6}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{color:'#5a6a8a',font:{size:11},padding:12}}}}
   });
 
@@ -648,7 +654,7 @@ function renderTiering() {
   destroyChart('chartTierBar');
   chartInstances.chartTierBar = new Chart(document.getElementById('chartTierBar'),{
     type:'bar',
-    data:{labels:['Tier 1: Low Risk','Tier 2: Monitor','Tier 3: High Risk'],datasets:[{data:[t1.length,t2.length,t3.length],backgroundColor:['#1a7a3c','#b45a00','#c0170f'],borderRadius:6,barThickness:50}]},
+    data:{labels:['Tier 1: Low Risk','Tier 2: Monitor','Tier 3: High Score'],datasets:[{data:[t1.length,t2.length,t3.length],backgroundColor:['#1a7a3c','#b45a00','#c0170f'],borderRadius:6,barThickness:50}]},
     options:{responsive:true,maintainAspectRatio:false,scales:{y:{grid:{color:'rgba(0,35,102,0.06)'},ticks:{color:'#5a6a8a'}},x:{grid:{display:false},ticks:{color:'#1a2340',font:{size:11}}}},plugins:{legend:{display:false}}}
   });
 
@@ -661,13 +667,13 @@ function renderTiering() {
       {label:'Tier 3',data:t3.map(s=>({x:calcWA(s),y:s.scores[7],r:8,name:s.name})),backgroundColor:'rgba(192,23,15,0.25)',borderColor:'#c0170f'}
     ]},
     options:{responsive:true,maintainAspectRatio:false,
-      scales:{x:{title:{display:true,text:'Risk Score',color:'#5a6a8a',font:{size:10}},grid:{color:'rgba(0,35,102,0.06)'},ticks:{color:'#5a6a8a'},min:0,max:10},
+      scales:{x:{title:{display:true,text:'Score',color:'#5a6a8a',font:{size:10}},grid:{color:'rgba(0,35,102,0.06)'},ticks:{color:'#5a6a8a'},min:0,max:10},
               y:{title:{display:true,text:'Switching Cost',color:'#5a6a8a',font:{size:10}},grid:{color:'rgba(0,35,102,0.06)'},ticks:{color:'#5a6a8a'},min:0,max:10}},
       plugins:{legend:{position:'bottom',labels:{color:'#5a6a8a',font:{size:10}}},tooltip:{callbacks:{label:ctx=>`${ctx.raw.name}: Score ${ctx.raw.x}, Switch ${ctx.raw.y}`}}}}
   });
 
   let html='';
-  [{tier:3,label:'Tier 3: High Risk (≥ 6.5)',cls:'badge-high',items:t3},{tier:2,label:'Tier 2: Monitor (4.0 to 6.4)',cls:'badge-mod',items:t2},{tier:1,label:'Tier 1: Low Risk (< 4.0)',cls:'badge-low',items:t1}].forEach(({label,cls,items})=>{
+  [{tier:3,label:'Tier 3: High Score (≥ 6.5)',cls:'badge-high',items:t3},{tier:2,label:'Tier 2: Monitor (4.0 to 6.4)',cls:'badge-mod',items:t2},{tier:1,label:'Tier 1: Low Risk (< 4.0)',cls:'badge-low',items:t1}].forEach(({label,cls,items})=>{
     html+=`<div class="card"><div class="card-title">${label} <span class="badge ${cls}">${items.length}</span></div>`;
     if(!items.length){html+='<div style="font-size:12px;color:var(--dim);padding:8px">None</div>'}
     items.sort((a,b)=>calcWA(b)-calcWA(a)).forEach(s=>{
@@ -712,15 +718,24 @@ function renderAnomalies() {
 }
 
 /* ── Supplier Detail Modal ── */
+let _currentDetailName = null;
 function showDetail(name) {
   const s = suppliers.find(x=>x.name===name);
   if(!s) return;
+  _currentDetailName = name;
   const wa = calcWA(s);
+  // Set dropdown to current level
+  const sel = document.getElementById('modalLevelSelect');
+  const currentLevel = s.risk || (wa<4?'LOW':wa<6.5?'MODERATE':'HIGH');
+  sel.value = currentLevel;
+  // Color the dropdown
+  sel.style.color = currentLevel==='LOW'?'#1a7a3c':currentLevel==='HIGH'?'#c0170f':'#b45a00';
+  sel.style.background = currentLevel==='LOW'?'#e8f5ee':currentLevel==='HIGH'?'#fde8e7':'#fef3e2';
   const rc = riskColor(s.risk||(wa<4?'LOW':wa<6.5?'MODERATE':'HIGH'));
   document.getElementById('modalSupplierName').innerHTML = `${s.name} <span style="font-size:14px;font-weight:800;color:${rc};margin-left:8px">${wa}</span>`;
   document.getElementById('modalContent').innerHTML = `
     <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-      <span class="badge ${riskBadge(s.risk||(wa<4?'LOW':wa<6.5?'MODERATE':'HIGH'))}">${s.risk||(wa<4?'LOW':wa<6.5?'MODERATE':'HIGH')}</span>
+      <span class="badge ${riskBadge(s.risk||(wa<4?'LOW':wa<6.5?'MODERATE':'HIGH'))}" id="modalLevelBadge">${s.risk||(wa<4?'LOW':wa<6.5?'MODERATE':'HIGH')}</span>
       <span style="font-size:11px;color:var(--muted);padding:3px 0">${s.sector}</span>
       ${s.sbti?`<span style="font-size:11px;color:var(--blue)">SBTi: ${s.sbti}</span>`:''}
     </div>
@@ -741,6 +756,20 @@ function showDetail(name) {
       <span style="color:var(--muted)">${getTier(s)===3?'Quarterly: Immediate action required':getTier(s)===2?'Semi-annually: Monitor key risk indicators':'Annually: Standard monitoring cycle'}</span>
     </div>`;
   document.getElementById('detailModal').classList.add('show');
+}
+function updateSupplierLevel() {
+  if(!_currentDetailName) return;
+  const s = suppliers.find(x=>x.name===_currentDetailName);
+  if(!s) return;
+  const sel = document.getElementById('modalLevelSelect');
+  s.risk = sel.value;
+  sel.style.color = s.risk==='LOW'?'#1a7a3c':s.risk==='HIGH'?'#c0170f':'#b45a00';
+  sel.style.background = s.risk==='LOW'?'#e8f5ee':s.risk==='HIGH'?'#fde8e7':'#fef3e2';
+  // Refresh badge in modal
+  const badge = document.getElementById('modalLevelBadge');
+  if(badge) { badge.textContent=s.risk; badge.className='badge '+riskBadge(s.risk); }
+  // Refresh dashboard metrics silently
+  renderMetrics();
 }
 function closeModal() { document.getElementById('detailModal').classList.remove('show'); }
 document.getElementById('detailModal').addEventListener('click', e=>{ if(e.target===document.getElementById('detailModal')) closeModal(); });
@@ -764,7 +793,7 @@ function loadExcel(e) {
       const iName=col('supplier'),iSeg=col('segment'),iEsg=col('esg'),iHr=col('human rights'),
         iHaz=col('haz waste'),iEn=col('energy'),iCon=col('conflict min'),iCo2=col('co2'),
         iDef=col('defective parts'),iSw=col('switch cost'),iScore=col('weighted score'),
-        iRisk=col('risk level'),iSbti=col('sbti'),iVt=col('violation tracker'),
+        iRisk=col('level'),iSbti=col('sbti'),iVt=col('violation tracker'),
         iFlag=col('flag'),iAction=col('action');
       if(iName===-1) throw new Error("Column 'Supplier' not found.");
       const parsed=[];
@@ -944,7 +973,7 @@ function finishResearch() {
         </div>
         <div style="text-align:center;background:var(--surface);padding:12px 20px;border-radius:8px">
           <div style="font-size:28px;font-weight:900;color:${rc}">${score}</div>
-          <div style="font-size:10px;color:var(--muted)">Risk Score</div>
+          <div style="font-size:10px;color:var(--muted)">Score</div>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px">
@@ -1119,7 +1148,7 @@ function renderSectorIntel(sector) {
         <div style="display:flex;gap:10px">
           <div style="text-align:center;background:var(--green-bg);border-radius:8px;padding:8px 16px">
             <div style="font-size:18px;font-weight:800;color:#1a7a3c">${low}</div>
-            <div style="font-size:9px;color:#1a7a3c;font-weight:700">LOW RISK</div>
+            <div style="font-size:9px;color:#1a7a3c;font-weight:700">LOW</div>
           </div>
           <div style="text-align:center;background:var(--amber-bg);border-radius:8px;padding:8px 16px">
             <div style="font-size:18px;font-weight:800;color:#b45a00">${mod}</div>
