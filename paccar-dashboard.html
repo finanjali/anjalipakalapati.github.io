@@ -512,7 +512,7 @@ function renderDashboard() {
     return `<div class="sector-card" onclick="drillSector('${sec}')">
       <div class="sc-name">${sec}</div>
       <div class="sc-count">${ss.length}</div>
-      <div class="sc-meta" style="color:${col}">Avg: ${avg}${high?' · '+high+' scoring high':''}</div>
+      <div class="sc-meta" style="color:${col}">Avg: ${avg}</div>
     </div>`;
   }).join('');
 
