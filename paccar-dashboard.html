@@ -748,7 +748,7 @@ function showDetail(name) {
       <div class="detail-item"><div class="d-label">Violation Tracker</div><div class="d-val" style="font-size:12px">${s.vt||', '}</div></div>
     </div>
     <div class="section-label">Flag / Anomaly</div>
-    <div class="info-block">${s.flag||', '}</div>
+    <div class="info-block">${s.flag ? s.flag.replace(/^[^a-zA-Z0-9$(]+/, '') : ''}</div>
     <div class="section-label">Key Action</div>
     <div class="info-block action-block">${s.action||', '}</div>
     <div style="margin-top:12px;padding:10px;background:var(--surface);border-radius:8px;font-size:11px">
@@ -1135,7 +1135,7 @@ function renderSectorIntel(sector) {
   const flagCounts = {};
   ss.forEach(s => {
     if (!s.flag) return;
-    const clean = s.flag.replace(/^[✅⚠🔴⛔🚨]\s*/,'').substring(0, 60);
+    const clean = s.flag.replace(/^[^a-zA-Z0-9$(]+/, '').substring(0, 60);
     const key = clean.split(', ')[0].trim();
     flagCounts[key] = (flagCounts[key] || 0) + 1;
   });
