@@ -21,6 +21,15 @@
   --red:#c0170f;--red-bg:#fde8e7;--red-bd:#f5a8a5;
   --border:#dde3ef;--radius:10px;
 }
+[data-theme="dark"]{
+  --bg:#0f172a;--card:#1e293b;--surface:#243044;--surface2:#2d3a52;
+  --text:#e2e8f0;--muted:#94a3b8;--dim:#64748b;--border:#2d3a52;
+  --blue-dim:rgba(42,126,229,0.15);--blue-border:rgba(42,126,229,0.35);
+  --green:#4ade80;--green-bg:#14532d;--green-bd:#166534;
+  --amber:#fb923c;--amber-bg:#431407;--amber-bd:#7c2d12;
+  --red:#f87171;--red-bg:#450a0a;--red-bd:#7f1d1d;
+}
+button:focus-visible,select:focus-visible,input:focus-visible,.btn:focus-visible,.nav-btn:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
 body{font-family:'Barlow',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 a{color:var(--navy-light);text-decoration:none}
 .header{display:flex;justify-content:space-between;align-items:center;padding:16px 32px;background:#2A7EE5;border-bottom:3px solid #C8A84B;box-shadow:0 2px 12px rgba(42,126,229,0.3)}
@@ -38,7 +47,7 @@ a{color:var(--navy-light);text-decoration:none}
 .btn-blue:hover{background:var(--navy-dark)}
 .btn-outline{border-color:var(--navy);color:var(--navy);background:#fff}
 .btn-sm{padding:5px 12px;font-size:11px}
-.nav{display:flex;gap:2px;padding:0 32px;background:#fff;border-bottom:2px solid var(--border);box-shadow:0 2px 8px rgba(0,35,102,0.06)}
+.nav{display:flex;gap:2px;padding:0 32px;background:var(--card);border-bottom:2px solid var(--border);box-shadow:0 2px 8px rgba(0,35,102,0.06)}
 .nav-btn{padding:11px 20px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:12px;font-weight:700;font-family:'Barlow Condensed',sans-serif;letter-spacing:0.8px;text-transform:uppercase;border-bottom:3px solid transparent;transition:all 0.15s;margin-bottom:-2px}
 .nav-btn:hover{color:var(--navy)}
 .nav-btn.active{color:var(--navy);border-bottom-color:#C8A84B;background:var(--blue-dim)}
@@ -69,11 +78,16 @@ a{color:var(--navy-light);text-decoration:none}
 .heatmap td.name-cell{text-align:left;background:transparent!important;color:var(--text);font-weight:500;cursor:pointer;padding-left:4px}
 .heatmap td.name-cell:hover{color:var(--navy-light)}
 .heatmap td.wa-cell{background:transparent!important;font-weight:800;color:var(--navy)}
-.h1,.h2,.h3{background:#d4f4df;color:#1a6632}
-.h4,.h5{background:#fef3c7;color:#92400e}
-.h6{background:#ffe0b2;color:#e65100}
-.h7,.h8{background:#fde8e7;color:#b91c1c}
-.h9,.h10{background:#f8b4b4;color:#7f1d1d}
+.h1{background:#dbeafe;color:#1e40af}
+.h2{background:#bfdbfe;color:#1e40af}
+.h3{background:#93c5fd;color:#1e3a8a}
+.h4{background:#fed7aa;color:#92400e}
+.h5{background:#fdba74;color:#7c2d12}
+.h6{background:#fb923c;color:#7c2d12}
+.h7{background:#f97316;color:#431407}
+.h8{background:#ea580c;color:#431407}
+.h9{background:#c2410c;color:#fff}
+.h10{background:#9a3412;color:#fff}
 .badge{display:inline-block;padding:3px 10px;border-radius:5px;font-size:10px;font-weight:700}
 .badge-low{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)}
 .badge-mod{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bd)}
@@ -153,6 +167,7 @@ a{color:var(--navy-light);text-decoration:none}
   </div>
   <div id="breadcrumb" class="breadcrumb"></div>
   <div class="header-right">
+    <button class="btn" onclick="toggleDark()" id="darkToggleBtn" title="Toggle dark mode" aria-label="Toggle dark mode" style="padding:7px 10px;font-size:16px;line-height:1">&#9790;</button>
     <label class="btn" style="cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:0.5px">
       Import Excel
       <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" onchange="loadExcel(event)">
@@ -449,6 +464,23 @@ let suppliers = [
 
 let chartInstances = {};
 let heatmapSort = {col:-1, asc:false};
+let currentPanel = 'dashboard';
+
+const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
+const CC = {
+  tick:   () => isDark() ? '#94a3b8' : '#5a6a8a',
+  label:  () => isDark() ? '#e2e8f0' : '#1a2340',
+  grid:   () => isDark() ? 'rgba(255,255,255,0.08)' : 'rgba(0,35,102,0.06)'
+};
+
+function toggleDark() {
+  const html = document.documentElement;
+  const dark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', dark ? 'light' : 'dark');
+  document.getElementById('darkToggleBtn').innerHTML = dark ? '&#9790;' : '&#9788;';
+  const panelRenders = {dashboard:renderDashboard, heatmap:()=>renderHeatmap(currentHeatmapFilter), tiering:renderTiering};
+  if (panelRenders[currentPanel]) panelRenders[currentPanel]();
+}
 
 /* ── Helpers ── */
 function calcWA(s) {
@@ -468,6 +500,7 @@ function toggleFormat() { const f=document.getElementById('formatHint'); f.style
 
 /* ── Navigation ── */
 function showPanel(name, btn) {
+  currentPanel = name;
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('p-'+name).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
@@ -523,7 +556,7 @@ function renderDashboard() {
   chartInstances.chartDoughnut = new Chart(document.getElementById('chartDoughnut'),{
     type:'doughnut',
     data:{labels:['Low','Moderate','High'],datasets:[{data:[low,mod,high],backgroundColor:['#1a7a3c','#b45a00','#c0170f'],borderWidth:0,hoverOffset:6}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{color:'#5a6a8a',font:{size:11},padding:12}}}}
+    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{color:CC.tick(),font:{size:11},padding:12}}}}
   });
 
   // Sector bars
@@ -532,7 +565,7 @@ function renderDashboard() {
   chartInstances.chartSectorBars = new Chart(document.getElementById('chartSectorBars'),{
     type:'bar',
     data:{labels:sectors.map(s=>s.length>18?s.substring(0,16)+'.':s),datasets:[{data:avgs,backgroundColor:avgs.map(a=>a<4?'#43a047':a<6.5?'#f9a825':'#e53935'),borderRadius:4,barThickness:18}]},
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{grid:{color:'rgba(0,35,102,0.06)'},ticks:{color:'#5a6a8a',font:{size:10}},max:10},y:{grid:{display:false},ticks:{color:'#1a2340',font:{size:10}}}},plugins:{legend:{display:false}}}
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{grid:{color:CC.grid()},ticks:{color:CC.tick(),font:{size:10}},max:10},y:{grid:{display:false},ticks:{color:CC.label(),font:{size:10}}}},plugins:{legend:{display:false}}}
   });
 
   // Top 10 by score
@@ -541,7 +574,7 @@ function renderDashboard() {
   chartInstances.chartTopRisk = new Chart(document.getElementById('chartTopRisk'),{
     type:'bar',
     data:{labels:top10.map(s=>s.name),datasets:[{data:top10.map(s=>calcWA(s)),backgroundColor:top10.map(s=>{const wa=calcWA(s);return wa>=6.5?'#c0170f':wa>=4?'#b45a00':'#1a7a3c'}),borderRadius:4,barThickness:22}]},
-    options:{responsive:true,maintainAspectRatio:false,scales:{y:{grid:{color:'rgba(0,35,102,0.06)'},ticks:{color:'#5a6a8a',font:{size:10}},max:10},x:{grid:{display:false},ticks:{color:'#1a2340',font:{size:10},maxRotation:30}}},plugins:{legend:{display:false}}}
+    options:{responsive:true,maintainAspectRatio:false,scales:{y:{grid:{color:CC.grid()},ticks:{color:CC.tick(),font:{size:10}},max:10},x:{grid:{display:false},ticks:{color:CC.label(),font:{size:10},maxRotation:30}}},plugins:{legend:{display:false}}}
   });
 
 }
@@ -583,7 +616,9 @@ function renderHeatmap(filter='all') {
     };
   });
 }
+let currentHeatmapFilter = 'all';
 function filterHeatmap(f,btn){
+  currentHeatmapFilter = f;
   document.querySelectorAll('#p-heatmap .f-btn').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
   renderHeatmap(f);
@@ -640,7 +675,7 @@ function renderTiering() {
   chartInstances.chartTierBar = new Chart(document.getElementById('chartTierBar'),{
     type:'bar',
     data:{labels:['Tier 1: Low','Tier 2: Monitor','Tier 3: High'],datasets:[{data:[t1.length,t2.length,t3.length],backgroundColor:['#1a7a3c','#b45a00','#c0170f'],borderRadius:6,barThickness:50}]},
-    options:{responsive:true,maintainAspectRatio:false,scales:{y:{grid:{color:'rgba(0,35,102,0.06)'},ticks:{color:'#5a6a8a'}},x:{grid:{display:false},ticks:{color:'#1a2340',font:{size:11}}}},plugins:{legend:{display:false}}}
+    options:{responsive:true,maintainAspectRatio:false,scales:{y:{grid:{color:CC.grid()},ticks:{color:CC.tick()}},x:{grid:{display:false},ticks:{color:CC.label(),font:{size:11}}}},plugins:{legend:{display:false}}}
   });
 
   destroyChart('chartBubble');
@@ -652,9 +687,9 @@ function renderTiering() {
       {label:'Tier 3',data:t3.map(s=>({x:calcWA(s),y:s.scores[7],r:8,name:s.name})),backgroundColor:'rgba(192,23,15,0.25)',borderColor:'#c0170f'}
     ]},
     options:{responsive:true,maintainAspectRatio:false,
-      scales:{x:{title:{display:true,text:'Score',color:'#5a6a8a',font:{size:10}},grid:{color:'rgba(0,35,102,0.06)'},ticks:{color:'#5a6a8a'},min:0,max:10},
-              y:{title:{display:true,text:'Switching Cost',color:'#5a6a8a',font:{size:10}},grid:{color:'rgba(0,35,102,0.06)'},ticks:{color:'#5a6a8a'},min:0,max:10}},
-      plugins:{legend:{position:'bottom',labels:{color:'#5a6a8a',font:{size:10}}},tooltip:{callbacks:{label:ctx=>`${ctx.raw.name}: Score ${ctx.raw.x}, Switch ${ctx.raw.y}`}}}}
+      scales:{x:{title:{display:true,text:'Score',color:CC.tick(),font:{size:10}},grid:{color:CC.grid()},ticks:{color:CC.tick()},min:0,max:10},
+              y:{title:{display:true,text:'Switching Cost',color:CC.tick(),font:{size:10}},grid:{color:CC.grid()},ticks:{color:CC.tick()},min:0,max:10}},
+      plugins:{legend:{position:'bottom',labels:{color:CC.tick(),font:{size:10}}},tooltip:{callbacks:{label:ctx=>`${ctx.raw.name}: Score ${ctx.raw.x}, Switch ${ctx.raw.y}`}}}}
   });
 
   let html='';
