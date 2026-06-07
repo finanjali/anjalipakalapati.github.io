@@ -176,8 +176,8 @@ a{color:var(--navy-light);text-decoration:none}
 
 <div class="main">
   <div class="upload-bar">
-    <span style="font-size:12px;font-weight:700;color:#fff">📂 Data Source</span>
-    <span class="upload-hint">Upload a <strong style="color:#fff">Suppliers</strong> sheet Excel to refresh all data &mdash; <a href="#" onclick="toggleFormat();return false" style="color:#c8d8ff">view column format</a></span>
+    <span style="font-size:12px;font-weight:700;color:#fff">Data Source</span>
+    <span class="upload-hint">Upload a <strong style="color:#fff">Suppliers</strong> sheet Excel to refresh all data. <a href="#" onclick="toggleFormat();return false" style="color:#c8d8ff">View column format</a></span>
     <div id="formatHint" style="display:none;font-size:10px;color:rgba(255,255,255,0.6);width:100%;margin-top:4px">
       Required columns: Supplier · Segment · ESG · Human Rights · Haz Waste · Energy · Conflict Min · CO2 · Defective Parts · Switch Cost · Weighted Score · Level · SBTi · Violation Tracker · Flag · Action
     </div>
@@ -193,7 +193,6 @@ a{color:var(--navy-light);text-decoration:none}
       <div class="card"><div class="card-title">Average Score by Sector</div><div class="chart-sm"><canvas id="chartSectorBars"></canvas></div></div>
     </div>
     <div class="card"><div class="card-title">Top 10 Highest-Scoring Suppliers</div><div class="chart-box"><canvas id="chartTopRisk"></canvas></div></div>
-    <div class="card"><div class="card-title">Criterion Score Breakdown: Safety-Critical vs Interiors avg</div><div class="chart-sm"><canvas id="chartRadar"></canvas></div></div>
   </div>
 
   <!-- SECTORS -->
@@ -338,7 +337,7 @@ a{color:var(--navy-light);text-decoration:none}
       </div>
 
       <div style="background:var(--surface);border-radius:8px;padding:12px 14px;margin-bottom:14px;border:1px solid var(--border)">
-        <div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:6px">📋 What we found in the report</div>
+        <div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:6px">What we found in the report</div>
         <div id="reportSignals"></div>
       </div>
 
@@ -494,7 +493,7 @@ function renderMetrics() {
     <div class="m-card"><div class="m-label">Total Suppliers</div><div class="m-val" style="color:var(--blue)">${suppliers.length}</div><div class="m-sub">${sectors} sectors</div></div>
     <div class="m-card"><div class="m-label">Low</div><div class="m-val" style="color:var(--green)">${low}</div><div class="m-sub">Score &lt; 4.0</div></div>
     <div class="m-card"><div class="m-label">Moderate</div><div class="m-val" style="color:var(--amber)">${mod}</div><div class="m-sub">Score 4.0 to 6.4</div></div>
-    <div class="m-card"><div class="m-label">High Score</div><div class="m-val" style="color:var(--red)">${high}</div><div class="m-sub">Score ≥ 6.5</div></div>
+    <div class="m-card"><div class="m-label">High</div><div class="m-val" style="color:var(--red)">${high}</div><div class="m-sub">Score ≥ 6.5</div></div>
     <div class="m-card"><div class="m-label">Portfolio Avg</div><div class="m-val" style="color:var(--navy)">${avg}</div><div class="m-sub">Weighted avg score</div></div>`;
 }
 
@@ -545,20 +544,6 @@ function renderDashboard() {
     options:{responsive:true,maintainAspectRatio:false,scales:{y:{grid:{color:'rgba(0,35,102,0.06)'},ticks:{color:'#5a6a8a',font:{size:10}},max:10},x:{grid:{display:false},ticks:{color:'#1a2340',font:{size:10},maxRotation:30}}},plugins:{legend:{display:false}}}
   });
 
-  // Radar: segment comparison
-  const critKeys = ["ESG Disclosure","Human Rights","Haz Waste","Energy Supply","Conflict Min","CO2 Compliance","Defective Parts","Switch Cost"];
-  const safety = suppliers.filter(s=>s.sector==='Safety-Critical');
-  const interiors = suppliers.filter(s=>s.sector==='Interiors');
-  function avg2(arr,i){return arr.length?+(arr.reduce((a,s)=>a+s.scores[i],0)/arr.length).toFixed(1):0}
-  destroyChart('chartRadar');
-  chartInstances.chartRadar = new Chart(document.getElementById('chartRadar'),{
-    type:'radar',
-    data:{labels:SHORT,datasets:[
-      {label:'Safety-Critical',data:SHORT.map((_,i)=>avg2(safety,i)),borderColor:'#002366',backgroundColor:'rgba(0,35,102,0.08)',borderWidth:2,pointBackgroundColor:'#002366'},
-      {label:'Interiors',data:SHORT.map((_,i)=>avg2(interiors,i)),borderColor:'#7c3aed',backgroundColor:'rgba(124,58,237,0.12)',borderWidth:2,pointBackgroundColor:'#7c3aed'}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,scales:{r:{grid:{color:'rgba(0,35,102,0.08)'},angleLines:{color:'rgba(0,35,102,0.08)'},ticks:{color:'#5a6a8a',font:{size:9},backdropColor:'transparent'},min:0,max:8,pointLabels:{color:'#5a6a8a',font:{size:10}}}},plugins:{legend:{position:'bottom',labels:{color:'#5a6a8a',font:{size:11}}}}}
-  });
 }
 
 /* ── Heatmap ── */
@@ -837,7 +822,7 @@ function loadExcel(e) {
       if(!parsed.length) throw new Error('No supplier rows found.');
       suppliers = parsed;
       renderDashboard();
-      status.className='upload-status'; status.textContent=`✅ ${parsed.length} suppliers loaded`;
+      status.className='upload-status'; status.textContent=`${parsed.length} suppliers loaded`;
       e.target.value='';
     } catch(err) { status.className='upload-status error'; status.textContent='❌ '+err.message; }
   };
@@ -1462,7 +1447,7 @@ function saveReportSupplier(){
   renderDashboard();
   const status=document.getElementById('uploadStatus');
   status.style.display='inline-block';status.className='upload-status';
-  status.textContent=`✅ ${name} ${existing>=0?'updated':'added'} from report`;
+  status.textContent=`${name} ${existing>=0?'updated':'added'} from report`;
 }
 
 function closeReportModal(){
