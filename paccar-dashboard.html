@@ -669,7 +669,7 @@ function renderTiering() {
   destroyChart('chartTierBar');
   chartInstances.chartTierBar = new Chart(document.getElementById('chartTierBar'),{
     type:'bar',
-    data:{labels:['Tier 1: Low','Tier 2: Monitor','Tier 3: High'],datasets:[{data:[t1.length,t2.length,t3.length],backgroundColor:['#1a7a3c','#b45a00','#c0170f'],borderRadius:6,barThickness:50}]},
+    data:{labels:['Tier 1: Low','Tier 2: Moderate','Tier 3: High'],datasets:[{data:[t1.length,t2.length,t3.length],backgroundColor:['#1a7a3c','#b45a00','#c0170f'],borderRadius:6,barThickness:50}]},
     options:{responsive:true,maintainAspectRatio:false,scales:{y:{grid:{color:CC.grid()},ticks:{color:CC.tick()}},x:{grid:{display:false},ticks:{color:CC.label(),font:{size:11}}}},plugins:{legend:{display:false}}}
   });
   destroyChart('chartBubble');
@@ -686,7 +686,7 @@ function renderTiering() {
       plugins:{legend:{position:'bottom',labels:{color:CC.tick(),font:{size:10}}},tooltip:{callbacks:{label:ctx=>`${ctx.raw.name}: Score ${ctx.raw.x}, Switch ${ctx.raw.y}`}}}}
   });
   let html='';
-  [{tier:3,label:'Tier 3: High (≥ 6.5)',cls:'badge-high',items:t3},{tier:2,label:'Tier 2: Monitor (4.0 to 6.4)',cls:'badge-mod',items:t2},{tier:1,label:'Tier 1: Low Risk (< 4.0)',cls:'badge-low',items:t1}].forEach(({label,cls,items})=>{
+  [{tier:3,label:'Tier 3: High (≥ 6.5)',cls:'badge-high',items:t3},{tier:2,label:'Tier 2: Moderate (4.0 to 6.4)',cls:'badge-mod',items:t2},{tier:1,label:'Tier 1: Low Risk (< 4.0)',cls:'badge-low',items:t1}].forEach(({label,cls,items})=>{
     html+=`<div class="card"><div class="card-title">${label} <span class="badge ${cls}">${items.length}</span></div>`;
     if(!items.length){html+='<div style="font-size:12px;color:var(--dim);padding:8px">None</div>'}
     items.sort((a,b)=>calcWA(b)-calcWA(a)).forEach(s=>{
