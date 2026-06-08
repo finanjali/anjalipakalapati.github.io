@@ -527,9 +527,10 @@ if(name==='custom') esgInit();
 }
 /* ── Metrics bar ── */
 function renderMetrics() {
-  const low=suppliers.filter(s=>s.risk==='LOW'||calcWA(s)<4).length;
-  const mod=suppliers.filter(s=>s.risk==='MODERATE'||(calcWA(s)>=4&&calcWA(s)<6.5)).length;
-  const high=suppliers.filter(s=>s.risk==='HIGH'||calcWA(s)>=6.5).length;
+  const getLevel=s=>s.risk||(calcWA(s)<4?'LOW':calcWA(s)<6.5?'MODERATE':'HIGH');
+  const low=suppliers.filter(s=>getLevel(s)==='LOW').length;
+  const mod=suppliers.filter(s=>getLevel(s)==='MODERATE').length;
+  const high=suppliers.filter(s=>getLevel(s)==='HIGH').length;
   const avg=(suppliers.reduce((a,s)=>a+calcWA(s),0)/suppliers.length).toFixed(1);
   const sectors=getSectors().length;
   document.getElementById('metricsBar').innerHTML=`
