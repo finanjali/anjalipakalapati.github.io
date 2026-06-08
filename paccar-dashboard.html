@@ -145,7 +145,6 @@ a{color:var(--navy-light);text-decoration:none}
 </style>
 </head>
 <body>
-
 <div class="header">
   <div class="header-left">
     <!-- PACCAR Logo wordmark -->
@@ -179,7 +178,6 @@ a{color:var(--navy-light);text-decoration:none}
     <div class="upload-status" id="uploadStatus"></div>
   </div>
 </div>
-
 <div class="nav">
   <button class="nav-btn active" onclick="showPanel('dashboard',this)">Dashboard</button>
   <button class="nav-btn" onclick="showPanel('sectorintel',this)">Sector Intel</button>
@@ -187,8 +185,8 @@ a{color:var(--navy-light);text-decoration:none}
   <button class="nav-btn" onclick="showPanel('tiering',this)">Tiering</button>
   <button class="nav-btn" onclick="showPanel('anomalies',this)">Anomalies</button>
   <button class="nav-btn" onclick="showPanel('research',this)">Research</button>
+<button class="nav-btn" onclick="showPanel('custom',this)">Custom Scorecard</button>
 </div>
-
 <div class="main">
   <div class="upload-bar">
     <span style="font-size:12px;font-weight:700;color:#fff">Data Source</span>
@@ -197,9 +195,7 @@ a{color:var(--navy-light);text-decoration:none}
       Required columns: Supplier · Segment · ESG · Human Rights · Haz Waste · Energy · Conflict Min · CO2 · Defective Parts · Switch Cost · Weighted Score · Level · SBTi · Violation Tracker · Flag · Action
     </div>
   </div>
-
   <div class="metrics" id="metricsBar"></div>
-
   <!-- DASHBOARD -->
   <div class="panel active" id="p-dashboard">
     <div class="sector-grid" id="sectorCards"></div>
@@ -209,13 +205,11 @@ a{color:var(--navy-light);text-decoration:none}
     </div>
     <div class="card"><div class="card-title">Top 10 Highest-Scoring Suppliers</div><div class="chart-box"><canvas id="chartTopRisk"></canvas></div></div>
   </div>
-
   <!-- SECTORS -->
   <div class="panel" id="p-sectors">
     <div class="filter-bar" id="sectorFilterBar"></div>
     <div id="sectorDetail"></div>
   </div>
-
   <!-- RESEARCH -->
   <div class="panel" id="p-research">
     <div class="card" id="researchInputCard">
@@ -280,13 +274,11 @@ a{color:var(--navy-light);text-decoration:none}
     </div>
     <div id="researchResult" style="display:none"></div>
   </div>
-
   <!-- SECTOR INTEL -->
   <div class="panel" id="p-sectorintel">
     <div class="filter-bar" id="intelFilterBar"></div>
     <div id="intelContent"></div>
   </div>
-
   <!-- HEATMAP -->
   <div class="panel" id="p-heatmap">
     <div class="filter-bar">
@@ -296,7 +288,6 @@ a{color:var(--navy-light);text-decoration:none}
     </div>
     <div class="card" style="overflow-x:auto"><table class="heatmap" id="heatmapTable"></table></div>
   </div>
-
   <!-- TIERING -->
   <div class="panel" id="p-tiering">
     <div class="grid-2">
@@ -305,21 +296,53 @@ a{color:var(--navy-light);text-decoration:none}
     </div>
     <div id="tierLists"></div>
   </div>
-
   <!-- ANOMALIES -->
   <div class="panel" id="p-anomalies">
     <div class="card"><div class="card-title">Critical Score Anomalies (score ≥ 7) <span class="badge badge-high" id="anomalyCount">0</span></div><div id="anomalyList"></div></div>
     <div class="card"><div class="card-title">High Score + High Switching Cost Combinations</div><div id="comboList"></div></div>
   </div>
-
   <!-- PROFILE (overlay panel) -->
-  <div class="panel" id="p-profile">
+  
+<div class="panel" id="p-custom">
+<div class="card">
+<div class="card-title">ESG Scorecard</div>
+<p style="font-size:12px;color:var(--muted);margin-bottom:12px">Evaluate any supplier. Select a sector to see key flags, enter scores, and the dashboard calculates the weighted score.</p>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+<div><label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">Company Name</label><input type="text" id="esgName" placeholder="Any supplier name" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:13px;color:var(--navy)"></div>
+<div><label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">Sector</label><select id="esgSec" onchange="esgOnSectorChange()" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:13px;color:var(--navy)"></select></div>
+</div>
+<div id="esgSectorFlags" style="margin-bottom:14px"></div>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:14px">
+<div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:6px">Scoring Guide</div>
+<div style="font-size:9px;color:var(--muted);line-height:1.7"><strong style="color:var(--text)">1-3 (Low):</strong> No penalties, clean record, CDP A/A-, MSCI AA+, SBTi validated, full CMRT.<br><strong style="color:var(--text)">4-6 (Moderate):</strong> Minor violations, limited ESG disclosure, SBTi committed not validated, some OSHA citations.<br><strong style="color:var(--text)">7-10 (High):</strong> Major penalties ($1M+), fatalities, willful OSHA, no ESG ratings, defeat devices, quality fraud, Superfund.</div>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+<div style="font-size:12px;font-weight:700;color:var(--navy);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:0.5px">Enter Scores</div>
+<div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="esgPrefill()">Load from Database</button><button class="btn btn-sm btn-outline" id="esgModeBtn" onclick="esgToggleMode()">Customize Weights</button></div>
+</div>
+<div id="esgWeightGuide" style="display:none;background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:8px;padding:12px 14px;margin-bottom:10px">
+<div style="font-size:10px;font-weight:700;color:var(--amber);margin-bottom:6px">Custom Weight Mode</div>
+<div style="font-size:9px;color:var(--muted);margin-bottom:8px">Default weights reflect sector-specific regulatory exposure. Adjust if your analysis suggests different priorities.</div>
+<div style="font-size:10px;font-weight:700;color:var(--navy);margin-bottom:6px">Weight Guide</div>
+<div style="font-size:9px;color:var(--muted);line-height:1.7;margin-bottom:8px"><strong style="color:var(--text)">15-22% (High):</strong> Direct regulatory penalties, safety-critical components, top Scope 3 contributor.<br><strong style="color:var(--text)">8-14% (Medium):</strong> Indirect exposure through reputation, reporting gaps, supply disruption.<br><strong style="color:var(--text)">3-7% (Low):</strong> Minimal direct impact. Broad baseline criterion.</div>
+<div style="display:flex;align-items:center;gap:8px"><span style="font-size:10px;color:var(--muted)">Total:</span><span id="esgCWTotal" style="font-size:13px;font-weight:800;color:var(--navy)">100%</span></div>
+</div>
+<div id="esgGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px"></div>
+<div style="display:flex;gap:8px"><button class="btn btn-blue" onclick="esgCalc()">Calculate Score</button><button class="btn" onclick="esgClear()">Clear</button></div>
+</div>
+<div id="esgOut" style="display:none"></div>
+<div id="esgYourResearch" style="display:none">
+<div class="card"><div class="card-title">Your Research <span id="esgYRCount" style="font-size:11px;font-weight:400;color:var(--muted)"></span><button class="btn btn-sm" onclick="esgClearAll()" style="margin-left:auto">Clear All</button></div><div id="esgYRTable"></div></div>
+<div class="grid-2"><div class="card"><div class="card-title">Score Comparison</div><div style="position:relative;height:250px"><canvas id="esgYRBar"></canvas></div></div><div class="card"><div class="card-title">Tier Distribution</div><div style="position:relative;height:250px"><canvas id="esgYRTier"></canvas></div></div></div>
+<div class="card"><div class="card-title">Score Profile</div><div style="position:relative;height:280px"><canvas id="esgYRRadar"></canvas></div></div>
+</div>
+</div>
+
+<div class="panel" id="p-profile">
     <div id="profileContent"></div>
   </div>
 </div>
-
 <div class="footer">PACCAR Inc. · Supplier Intelligence Platform · Purchasing &amp; Supply Chain Sustainability · Internal Use Only · Scale 1 to 10 (higher score = greater attention needed)</div>
-
 <!-- Report Upload Modal -->
 <div class="modal-overlay" id="reportModal">
   <div class="report-modal">
@@ -330,13 +353,11 @@ a{color:var(--navy-light);text-decoration:none}
       </div>
       <button class="btn btn-sm" onclick="closeReportModal()">✕ Close</button>
     </div>
-
     <!-- Progress -->
     <div id="reportProgress" style="margin-bottom:16px">
       <div style="font-size:11px;color:var(--muted);margin-bottom:4px" id="reportProgressText">Extracting text.</div>
       <div class="progress-bar"><div class="progress-fill" id="reportProgressBar" style="width:0%"></div></div>
     </div>
-
     <!-- Supplier name input -->
     <div id="reportSupplierInput" style="display:none;margin-bottom:16px">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
@@ -350,22 +371,18 @@ a{color:var(--navy-light);text-decoration:none}
           <select id="reportSector" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:13px;color:var(--navy)"></select>
         </div>
       </div>
-
       <div style="background:var(--surface);border-radius:8px;padding:12px 14px;margin-bottom:14px;border:1px solid var(--border)">
         <div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:6px">What we found in the report</div>
         <div id="reportSignals"></div>
       </div>
-
       <div style="margin-bottom:14px">
         <div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:10px">Suggested Scores: review and adjust before saving (1 = lowest, 10 = highest)</div>
         <div id="reportScoreGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"></div>
       </div>
-
       <div style="margin-bottom:14px">
         <label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">Key Risk Summary (one line)</label>
         <input type="text" id="reportKeySummary" placeholder="e.g. No SBTi commitment, CDP B only" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:12px;color:var(--navy)">
       </div>
-
       <div style="display:flex;gap:8px;justify-content:flex-end">
         <button class="btn" onclick="closeReportModal()">Cancel</button>
         <button class="btn btn-blue" onclick="saveReportSupplier()">Save to Dashboard</button>
@@ -373,7 +390,6 @@ a{color:var(--navy-light);text-decoration:none}
     </div>
   </div>
 </div>
-
 <!-- Supplier Detail Modal -->
 <div class="modal-overlay" id="detailModal">
   <div class="modal">
@@ -391,21 +407,20 @@ a{color:var(--navy-light);text-decoration:none}
     <div id="modalContent"></div>
   </div>
 </div>
-
 <script>
 const CRITERIA = ["ESG Disclosure","Human Rights","Haz Waste","Energy Supply","Conflict Min","CO2 Compliance","Defective Parts","Switch Cost"];
 const SHORT = ["ESG","HR","Haz","Energy","CM","CO2","Defect","Switch"];
-
 const WEIGHTS = {
   "Safety-Critical":     [0.08,0.10,0.12,0.08,0.12,0.20,0.20,0.10],
   "Interiors":           [0.10,0.08,0.22,0.10,0.05,0.20,0.10,0.15],
   "Tires":               [0.08,0.22,0.08,0.10,0.06,0.20,0.16,0.10],
   "Coatings":            [0.08,0.10,0.20,0.12,0.05,0.22,0.13,0.10],
   "Electronics, Wiring & Sensors": [0.08,0.15,0.10,0.06,0.15,0.13,0.18,0.15],
-  "Fluids, Filtration & Emissions":[0.08,0.10,0.18,0.12,0.05,0.22,0.13,0.12]
+  "Chemicals, Oils & Fuels":[0.08,0.10,0.18,0.12,0.05,0.22,0.13,0.12]
 };
 const DEFAULT_W = [0.10,0.12,0.15,0.08,0.08,0.18,0.16,0.13];
-
+const ALL_SECTORS = ['Safety-Critical','Interiors','Tires','Coatings','Electronics, Wiring & Sensors','Chemicals, Oils & Fuels','Powertrain','Metals & Chassis'];
+var customSuppliers=[];
 let suppliers = [
   {name:"Knorr-Bremse",sector:"Safety-Critical",scores:[1,2,2,2,3,1,2,5],score:2.14,risk:"LOW",sbti:"Validated",vt:"No major US penalties",flag:"✅ Benchmark: EcoDesign leader, SBTi validated",action:"Use as benchmark. Request fossil-free steel adoption roadmap."},
   {name:"ZF Friedrichshafen",sector:"Safety-Critical",scores:[2,2,3,3,3,2,3,5],score:2.82,risk:"LOW",sbti:"Validated",vt:"No major US penalties",flag:"✅ Brake-by-wire 2024, OnGuardMAX ADAS EU GSR II compliant",action:"Maintain. Request EU GSR II compliance roadmap."},
@@ -447,12 +462,12 @@ let suppliers = [
   {name:"Valeo",sector:"Electronics, Wiring & Sensors",scores:[1,3,3,3,6,2,3,5],score:3.46,risk:"LOW",sbti:"Validated",vt:"$33.5M group",flag:"✅ CDP A, SBTi Validated, strong ESG programme.",action:"Maintain. Monitor group-level penalty profile."},
   {name:"Mitsubishi Electric",sector:"Electronics, Wiring & Sensors",scores:[2,3,3,3,6,3,7,3],score:4.09,risk:"MODERATE",sbti:"Validated",vt:"$384.5M (18 records)",flag:"⚠ Defective parts 7: 40-year data falsification on record.",action:"Request quality assurance certification for PACCAR-specific components."},
   {name:"Clarios",sector:"Electronics, Wiring & Sensors",scores:[4,5,8,5,4,6,3,6],score:4.99,risk:"MODERATE",sbti:"None",vt:"$39K / $1.1B (JCI legacy)",flag:"⚠ Hazwaste 8: JCI legacy $1.1B. Lead exposure records.",action:"Request hazardous waste management plan for PACCAR-supplying plants."},
-  {name:"Donaldson",sector:"Fluids, Filtration & Emissions",scores:[1,2,3,2,2,1,2,6],score:2.36,risk:"LOW",sbti:"Validated",vt:"$2.5M (26 records)",flag:"✅ Lowest risk in portfolio. SBTi Validated, CDP A-.",action:"Use as benchmark for filtration sector."},
-  {name:"Parker Hannifin",sector:"Fluids, Filtration & Emissions",scores:[2,2,5,3,3,3,3,4],score:3.30,risk:"LOW",sbti:"Committed",vt:"$39.4M (136 records)",flag:"⚠ 136 Violation Tracker records: most in portfolio. SBTi Committed.",action:"Request facility-level compliance data for PACCAR-supplying plants."},
-  {name:"Cummins Emission Solutions",sector:"Fluids, Filtration & Emissions",scores:[4,2,4,3,3,8,5,5],score:4.76,risk:"MODERATE",sbti:"Validated",vt:"$4.19B (94 records)",flag:"⚠ $1.675B CAA penalty 2024. High CO2 compliance risk.",action:"Request CAA remediation plan and emissions monitoring data."},
-  {name:"Voss Fluid",sector:"Fluids, Filtration & Emissions",scores:[5,4,4,5,3,5,3,4],score:4.24,risk:"MODERATE",sbti:"None",vt:"No records",flag:"⚠ No ESG ratings: zero third-party assessment.",action:"Send supplier questionnaire. Request sustainability disclosure."},
-  {name:"Sogefi Filtration",sector:"Fluids, Filtration & Emissions",scores:[4,3,4,4,5,5,3,7],score:4.40,risk:"MODERATE",sbti:"None",vt:"Minimal",flag:"⚠ Switching cost 7 + no SBTi + limited disclosure.",action:"Request ESG disclosure and SBTi commitment timeline."},
-  {name:"Phillips & Temro Industries",sector:"Fluids, Filtration & Emissions",scores:[7,5,5,6,6,6,3,8],score:5.65,risk:"MODERATE",sbti:"None",vt:"Minimal",flag:"🔴 Highest risk in fluids sector. ESG 7, switching 8, zero ratings.",action:"URGENT: Send full questionnaire. Switching cost 8 makes this a priority."},
+  {name:"Donaldson",sector:"Chemicals, Oils & Fuels",scores:[1,2,3,2,2,1,2,6],score:2.36,risk:"LOW",sbti:"Validated",vt:"$2.5M (26 records)",flag:"✅ Lowest risk in portfolio. SBTi Validated, CDP A-.",action:"Use as benchmark for filtration sector."},
+  {name:"Parker Hannifin",sector:"Chemicals, Oils & Fuels",scores:[2,2,5,3,3,3,3,4],score:3.30,risk:"LOW",sbti:"Committed",vt:"$39.4M (136 records)",flag:"⚠ 136 Violation Tracker records: most in portfolio. SBTi Committed.",action:"Request facility-level compliance data for PACCAR-supplying plants."},
+  {name:"Cummins Emission Solutions",sector:"Chemicals, Oils & Fuels",scores:[4,2,4,3,3,8,5,5],score:4.76,risk:"MODERATE",sbti:"Validated",vt:"$4.19B (94 records)",flag:"⚠ $1.675B CAA penalty 2024. High CO2 compliance risk.",action:"Request CAA remediation plan and emissions monitoring data."},
+  {name:"Voss Fluid",sector:"Chemicals, Oils & Fuels",scores:[5,4,4,5,3,5,3,4],score:4.24,risk:"MODERATE",sbti:"None",vt:"No records",flag:"⚠ No ESG ratings: zero third-party assessment.",action:"Send supplier questionnaire. Request sustainability disclosure."},
+  {name:"Sogefi Filtration",sector:"Chemicals, Oils & Fuels",scores:[4,3,4,4,5,5,3,7],score:4.40,risk:"MODERATE",sbti:"None",vt:"Minimal",flag:"⚠ Switching cost 7 + no SBTi + limited disclosure.",action:"Request ESG disclosure and SBTi commitment timeline."},
+  {name:"Phillips & Temro Industries",sector:"Chemicals, Oils & Fuels",scores:[7,5,5,6,6,6,3,8],score:5.65,risk:"MODERATE",sbti:"None",vt:"Minimal",flag:"🔴 Highest risk in fluids sector. ESG 7, switching 8, zero ratings.",action:"URGENT: Send full questionnaire. Switching cost 8 makes this a priority."},
   // Powertrain & Driveline (from Dynamic Scoring Model)
   {name:"Dana Corporation (Powertrain)",sector:"Powertrain & Driveline",scores:[2,4,4,2,4,5,4,5],score:3.48,risk:"LOW",sbti:"Committed",vt:"$2.5M+ group",flag:"Scope 3 and PCF data gap. ISO 14001 and 45001 certified. Strong renewable energy progress.",action:"Request Scope 3 product-level data and carbon footprint documentation for driveline components."},
   {name:"AAM (American Axle)",sector:"Powertrain & Driveline",scores:[2,2,4,2,4,7,2,5],score:3.54,risk:"LOW",sbti:"None",vt:"No major records",flag:"Scope 3 and PCF gap. Strong safety record. ISO 14001 certified across major sites.",action:"Request SBTi commitment timeline and product carbon footprint for EV driveline components."},
@@ -461,18 +476,15 @@ let suppliers = [
   {name:"ZF Friedrichshafen (Powertrain)",sector:"Powertrain & Driveline",scores:[2,9,3,5,4,8,9,6],score:5.82,risk:"MODERATE",sbti:"Validated",vt:"$53.4M US group",flag:"Critical safety and governance gap. Scope 3 data absent. Strong sector fit and ESG disclosure.",action:"URGENT: Request Scope 3 and safety governance data. Monitor post spin-off of Aumovio."},
   {name:"Allison Transmission",sector:"Powertrain & Driveline",scores:[8,6,9,9,4,8,6,4],score:7.12,risk:"HIGH",sbti:"None",vt:"No major records",flag:"Multiple critical gaps: climate, materials, circularity, safety governance, evidence quality. Very limited ESG data published.",action:"CRITICAL: Full supplier questionnaire required. No climate targets, no waste data, no ISO certifications confirmed."}
 ];
-
 let chartInstances = {};
 let heatmapSort = {col:-1, asc:false};
 let currentPanel = 'dashboard';
-
 const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
 const CC = {
   tick:   () => isDark() ? '#94a3b8' : '#5a6a8a',
   label:  () => isDark() ? '#e2e8f0' : '#1a2340',
   grid:   () => isDark() ? 'rgba(255,255,255,0.08)' : 'rgba(0,35,102,0.06)'
 };
-
 function toggleDark() {
   const html = document.documentElement;
   const dark = html.getAttribute('data-theme') === 'dark';
@@ -481,7 +493,6 @@ function toggleDark() {
   const panelRenders = {dashboard:renderDashboard, heatmap:()=>renderHeatmap(currentHeatmapFilter), tiering:renderTiering};
   if (panelRenders[currentPanel]) panelRenders[currentPanel]();
 }
-
 /* ── Helpers ── */
 function calcWA(s) {
   if (s.score) return +s.score.toFixed(2);
@@ -497,7 +508,6 @@ function getSectors() { return [...new Set(suppliers.map(s=>s.sector))].sort(); 
 function scoreColor(v) { return v<=3?'var(--green)':v<=6?'var(--amber)':'var(--red)'; }
 function destroyChart(id) { if(chartInstances[id]){chartInstances[id].destroy();delete chartInstances[id];} }
 function toggleFormat() { const f=document.getElementById('formatHint'); f.style.display=f.style.display==='block'?'none':'block'; }
-
 /* ── Navigation ── */
 function showPanel(name, btn) {
   currentPanel = name;
@@ -510,11 +520,11 @@ function showPanel(name, btn) {
   if(name==='heatmap') renderHeatmap('all');
   if(name==='sectorintel') renderSectorIntel(getSectors()[0]);
   if(name==='research') initResearch();
+if(name==='custom') esgInit();
   if(name==='tiering') renderTiering();
   if(name==='anomalies') renderAnomalies();
   if(name==='sectors') renderSectorList();
 }
-
 /* ── Metrics bar ── */
 function renderMetrics() {
   const low=suppliers.filter(s=>s.risk==='LOW'||calcWA(s)<4).length;
@@ -529,12 +539,10 @@ function renderMetrics() {
     <div class="m-card"><div class="m-label">High</div><div class="m-val" style="color:var(--red)">${high}</div><div class="m-sub">Score ≥ 6.5</div></div>
     <div class="m-card"><div class="m-label">Portfolio Avg</div><div class="m-val" style="color:var(--navy)">${avg}</div><div class="m-sub">Weighted avg score</div></div>`;
 }
-
 /* ── Dashboard ── */
 function renderDashboard() {
   renderMetrics();
   const sectors = getSectors();
-
   // Sector cards
   document.getElementById('sectorCards').innerHTML = sectors.map(sec => {
     const ss = suppliers.filter(s=>s.sector===sec);
@@ -547,7 +555,6 @@ function renderDashboard() {
       <div class="sc-meta" style="color:${col}">Avg: ${avg}</div>
     </div>`;
   }).join('');
-
   // Doughnut
   const low=suppliers.filter(s=>calcWA(s)<4).length;
   const mod=suppliers.filter(s=>calcWA(s)>=4&&calcWA(s)<6.5).length;
@@ -558,7 +565,6 @@ function renderDashboard() {
     data:{labels:['Low','Moderate','High'],datasets:[{data:[low,mod,high],backgroundColor:['#1a7a3c','#b45a00','#c0170f'],borderWidth:0,hoverOffset:6}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{color:CC.tick(),font:{size:11},padding:12}}}}
   });
-
   // Sector bars
   const avgs = sectors.map(sec=>{const ss=suppliers.filter(s=>s.sector===sec);return+(ss.reduce((a,s)=>a+calcWA(s),0)/ss.length).toFixed(1)});
   destroyChart('chartSectorBars');
@@ -567,7 +573,6 @@ function renderDashboard() {
     data:{labels:sectors.map(s=>s.length>18?s.substring(0,16)+'.':s),datasets:[{data:avgs,backgroundColor:avgs.map(a=>a<4?'#43a047':a<6.5?'#f9a825':'#e53935'),borderRadius:4,barThickness:18}]},
     options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{grid:{color:CC.grid()},ticks:{color:CC.tick(),font:{size:10}},max:10},y:{grid:{display:false},ticks:{color:CC.label(),font:{size:10}}}},plugins:{legend:{display:false}}}
   });
-
   // Top 10 by score
   const top10=[...suppliers].sort((a,b)=>calcWA(b)-calcWA(a)).slice(0,10);
   destroyChart('chartTopRisk');
@@ -576,26 +581,21 @@ function renderDashboard() {
     data:{labels:top10.map(s=>s.name),datasets:[{data:top10.map(s=>calcWA(s)),backgroundColor:top10.map(s=>{const wa=calcWA(s);return wa>=6.5?'#c0170f':wa>=4?'#b45a00':'#1a7a3c'}),borderRadius:4,barThickness:22}]},
     options:{responsive:true,maintainAspectRatio:false,scales:{y:{grid:{color:CC.grid()},ticks:{color:CC.tick(),font:{size:10}},max:10},x:{grid:{display:false},ticks:{color:CC.label(),font:{size:10},maxRotation:30}}},plugins:{legend:{display:false}}}
   });
-
 }
-
 /* ── Heatmap ── */
 function renderHeatmap(filter='all') {
   const list = filter==='all'?suppliers:suppliers.filter(s=>s.sector===filter);
   const sectors = getSectors();
   let fb = sectors.map(s=>`<button class="f-btn${filter===s?' active':''}" onclick="filterHeatmap('${s}',this)">${s.length>18?s.substring(0,16)+'.':s}</button>`).join('');
   document.getElementById('heatmapFilters').innerHTML = fb;
-
   const sorted = heatmapSort.col>=0?[...list].sort((a,b)=>{
     const va=heatmapSort.col===8?calcWA(a):a.scores[heatmapSort.col];
     const vb=heatmapSort.col===8?calcWA(b):b.scores[heatmapSort.col];
     return heatmapSort.asc?va-vb:vb-va;
   }):list;
-
   let html='<tr><th>Supplier</th><th>Sector</th>';
   SHORT.forEach(s=>{html+=`<th>${s}</th>`});
   html+='<th>Score</th><th>Level</th></tr>';
-
   sorted.forEach(s=>{
     const wa=calcWA(s);
     const rc=riskColor(s.risk||( wa<4?'LOW':wa<6.5?'MODERATE':'HIGH'));
@@ -604,7 +604,6 @@ function renderHeatmap(filter='all') {
     html+=`<td class="wa-cell" style="color:${rc}">${wa}</td><td><span style="font-size:10px;font-weight:700;color:${rc}">${s.risk||( wa<4?'LOW':wa<6.5?'MOD':'HIGH')}</span></td></tr>`;
   });
   document.getElementById('heatmapTable').innerHTML = html;
-
   document.querySelectorAll('#heatmapTable th').forEach((th,i)=>{
     if(i<=1) return;
     th.style.cursor='pointer';
@@ -623,14 +622,12 @@ function filterHeatmap(f,btn){
   if(btn) btn.classList.add('active');
   renderHeatmap(f);
 }
-
 /* ── Sector list ── */
 function renderSectorList() {
   const sectors = getSectors();
   document.getElementById('sectorFilterBar').innerHTML = sectors.map(s=>`<button class="f-btn" onclick="drillSector('${s}')">${s}</button>`).join('');
   document.getElementById('sectorDetail').innerHTML = `<div style="color:var(--muted);font-size:13px;padding:20px">Select a sector above to view detailed breakdown.</div>`;
 }
-
 function drillSector(sec) {
   showPanel('sectors');
   document.getElementById('breadcrumb').innerHTML = `<span onclick="showPanel('dashboard')">Dashboard</span> › ${sec}`;
@@ -639,7 +636,6 @@ function drillSector(sec) {
   const avg = (ss.reduce((a,s)=>a+calcWA(s),0)/ss.length).toFixed(1);
   const sectors = getSectors();
   document.getElementById('sectorFilterBar').innerHTML = sectors.map(s=>`<button class="f-btn${s===sec?' active':''}" onclick="drillSector('${s}')">${s.length>18?s.substring(0,16)+'.':s}</button>`).join('');
-
   let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
     <div style="font-size:15px;font-weight:700;color:#fff">${sec}</div>
     <div style="display:flex;gap:8px">
@@ -664,20 +660,17 @@ function drillSector(sec) {
   html+=`</div></div>`;
   document.getElementById('sectorDetail').innerHTML = html;
 }
-
 /* ── Tiering ── */
 function renderTiering() {
   const t1=suppliers.filter(s=>getTier(s)===1);
   const t2=suppliers.filter(s=>getTier(s)===2);
   const t3=suppliers.filter(s=>getTier(s)===3);
-
   destroyChart('chartTierBar');
   chartInstances.chartTierBar = new Chart(document.getElementById('chartTierBar'),{
     type:'bar',
     data:{labels:['Tier 1: Low','Tier 2: Monitor','Tier 3: High'],datasets:[{data:[t1.length,t2.length,t3.length],backgroundColor:['#1a7a3c','#b45a00','#c0170f'],borderRadius:6,barThickness:50}]},
     options:{responsive:true,maintainAspectRatio:false,scales:{y:{grid:{color:CC.grid()},ticks:{color:CC.tick()}},x:{grid:{display:false},ticks:{color:CC.label(),font:{size:11}}}},plugins:{legend:{display:false}}}
   });
-
   destroyChart('chartBubble');
   chartInstances.chartBubble = new Chart(document.getElementById('chartBubble'),{
     type:'bubble',
@@ -691,7 +684,6 @@ function renderTiering() {
               y:{title:{display:true,text:'Switching Cost',color:CC.tick(),font:{size:10}},grid:{color:CC.grid()},ticks:{color:CC.tick()},min:0,max:10}},
       plugins:{legend:{position:'bottom',labels:{color:CC.tick(),font:{size:10}}},tooltip:{callbacks:{label:ctx=>`${ctx.raw.name}: Score ${ctx.raw.x}, Switch ${ctx.raw.y}`}}}}
   });
-
   let html='';
   [{tier:3,label:'Tier 3: High (≥ 6.5)',cls:'badge-high',items:t3},{tier:2,label:'Tier 2: Monitor (4.0 to 6.4)',cls:'badge-mod',items:t2},{tier:1,label:'Tier 1: Low Risk (< 4.0)',cls:'badge-low',items:t1}].forEach(({label,cls,items})=>{
     html+=`<div class="card"><div class="card-title">${label} <span class="badge ${cls}">${items.length}</span></div>`;
@@ -709,7 +701,6 @@ function renderTiering() {
   });
   document.getElementById('tierLists').innerHTML = html;
 }
-
 /* ── Anomalies ── */
 function renderAnomalies() {
   let flags=[];
@@ -739,7 +730,6 @@ function renderAnomalies() {
       </div>
     </div>`;
   }).join(''):'<div style="padding:12px;font-size:12px;color:var(--dim)">No critical anomalies</div>';
-
   let combos=[];
   suppliers.forEach(s=>{
     const wa=calcWA(s),sw=s.scores[7];
@@ -751,7 +741,6 @@ function renderAnomalies() {
       <div style="font-size:11px;color:#b91c1c">Score: <b style="color:#7f1d1d">${c.wa}</b> · Switch: <b style="color:#7f1d1d">${c.sw}</b></div>
     </div>`).join(''):'<div style="padding:12px;font-size:12px;color:var(--dim)">No dangerous combinations found</div>';
 }
-
 /* ── Supplier Detail Modal ── */
 let _currentDetailName = null;
 function showDetail(name) {
@@ -808,7 +797,6 @@ function changeLevel(name, sel) {
   // If dashboard visible, refresh dashboard charts
   if(document.getElementById('p-dashboard').classList.contains('active')) renderDashboard();
 }
-
 function updateSupplierLevel() {
   if(!_currentDetailName) return;
   const sel = document.getElementById('modalLevelSelect');
@@ -820,7 +808,6 @@ function updateSupplierLevel() {
 }
 function closeModal() { document.getElementById('detailModal').classList.remove('show'); }
 document.getElementById('detailModal').addEventListener('click', e=>{ if(e.target===document.getElementById('detailModal')) closeModal(); });
-
 /* ── Excel Upload ── */
 function loadExcel(e) {
   const file = e.target.files[0];
@@ -863,13 +850,12 @@ function loadExcel(e) {
   };
   reader.readAsArrayBuffer(file);
 }
-
 /* ════════════════════════════════════════════
    RESEARCH TAB
    ════════════════════════════════════════════ */
 const RESEARCH_SOURCES = [
   { id:"vt", name:"Violation Tracker", desc:"Total enforcement penalties, records, violation types across all US agencies",
-    url: c => `https://violationtracker.goodjobsfirst.org/parent/${encodeURIComponent(c)}`,
+    url: c => `https://www.google.com/search?q=${encodeURIComponent(c)}+site:violationtracker.goodjobsfirst.org`,
     criteria:[0,1], autoScore: t => {
       if(/no record|0 record|not found/i.test(t)) return {s:[2,2],h:["No records","Clean record"]};
       if(/\$[1-9]\d{2}[Mm]|\$\d+[Bb]/i.test(t)) return {s:[7,6],h:["Major penalties ($100M+)","Serious violations"]};
@@ -877,7 +863,7 @@ const RESEARCH_SOURCES = [
       return {s:[3,3],h:["Minor records","Minor records"]};
     }},
   { id:"epa", name:"EPA ECHO", desc:"Environmental compliance history, Clean Air Act, Clean Water Act, RCRA hazardous waste violations",
-    url: c => `https://echo.epa.gov/facilities/facility-search/results?search=${encodeURIComponent(c)}&view=map`,
+    url: c => `https://www.google.com/search?q=${encodeURIComponent(c)}+EPA+ECHO+environmental+violations`,
     criteria:[2,5], autoScore: t => {
       const s=[3,3],h=["No major EPA findings","No major CAA findings"];
       if(/superfund|cercla/i.test(t)){s[0]=8;h[0]="Superfund site";}
@@ -886,7 +872,7 @@ const RESEARCH_SOURCES = [
       return {s,h};
     }},
   { id:"osha", name:"OSHA Enforcement", desc:"Workplace safety inspections, citations, penalties and fatalities",
-    url: c => `https://www.osha.gov/pls/imis/establishment.search?p_logger=1&establishment=${encodeURIComponent(c)}&State=All&officetype=all&p_start=&p_finish=0&p_sort=10&p_desc=DESC&p_direction=Next&p_show=20`,
+    url: c => `https://www.google.com/search?q=${encodeURIComponent(c)}+OSHA+workplace+safety+violations`,
     criteria:[1], autoScore: t => {
       if(/fatal|death|killed/i.test(t)) return {s:[8],h:["Fatality on record"]};
       if(/willful/i.test(t)) return {s:[7],h:["Willful violations"]};
@@ -895,7 +881,7 @@ const RESEARCH_SOURCES = [
       return {s:[4],h:["Minor findings"]};
     }},
   { id:"cdp", name:"CDP Climate Scores", desc:"CDP Climate Change, Water Security and Forests disclosure scores",
-    url: c => `https://www.cdp.net/en/responses?queries%5Bname%5D=${encodeURIComponent(c)}`,
+    url: c => `https://www.google.com/search?q=${encodeURIComponent(c)}+CDP+climate+score`,
     criteria:[0,5], autoScore: t => {
       if(/\bA\b|A-/i.test(t)) return {s:[2,2],h:["CDP A/A-","Strong climate action"]};
       if(/\bB\b|B-/i.test(t)) return {s:[3,4],h:["CDP B/B-","Moderate"]};
@@ -903,14 +889,14 @@ const RESEARCH_SOURCES = [
       return {s:[6,6],h:["Not disclosed","Not disclosed"]};
     }},
   { id:"sbti", name:"SBTi Target Dashboard", desc:"Science Based Targets: Validated, Committed, or not listed",
-    url: () => `https://sciencebasedtargets.org/companies-taking-action#table`,
+    url: c => `https://www.google.com/search?q=${encodeURIComponent(c)}+SBTi+science+based+targets`,
     criteria:[5], autoScore: t => {
       if(/validated|approved/i.test(t)) return {s:[2],h:["SBTi Validated"]};
       if(/committed/i.test(t)) return {s:[4],h:["SBTi Committed"]};
       return {s:[6],h:["Not listed on SBTi"]};
     }},
   { id:"sec", name:"SEC EDGAR (Conflict Minerals)", desc:"Annual SD filings, CMRT, 3TG traceability disclosures",
-    url: c => `https://efts.sec.gov/LATEST/search-index?q=%22${encodeURIComponent(c)}%22&forms=SD`,
+    url: c => `https://www.google.com/search?q=${encodeURIComponent(c)}+SEC+conflict+minerals+SD+filing`,
     criteria:[4], autoScore: t => {
       if(/cmrt.*publish|full traceability|rmap/i.test(t)) return {s:[2],h:["Full CMRT published"]};
       if(/cmrt|sd filing/i.test(t)) return {s:[4],h:["CMRT filed"]};
@@ -918,7 +904,7 @@ const RESEARCH_SOURCES = [
       return {s:[5],h:["Limited visibility"]};
     }},
   { id:"msci", name:"MSCI ESG Ratings", desc:"MSCI ESG rating (AAA to CCC) and controversies screen",
-    url: () => `https://www.msci.com/our-solutions/esg-investing/esg-ratings-climate-search-tool`,
+    url: c => `https://www.google.com/search?q=${encodeURIComponent(c)}+MSCI+ESG+rating`,
     criteria:[0,6], autoScore: t => {
       if(/\bAAA\b|\bAA\b/i.test(t)) return {s:[2,2],h:["MSCI AA/AAA","Strong quality"]};
       if(/\bBBB\b|\bBB\b/i.test(t)) return {s:[3,3],h:["MSCI BBB/BB","Adequate"]};
@@ -926,14 +912,11 @@ const RESEARCH_SOURCES = [
       return {s:[5,4],h:["Not rated","No data"]};
     }}
 ];
-
 let currentResearch = null;
-
 function initResearch() {
   const sel = document.getElementById('rSectorInput');
-  if(sel) sel.innerHTML = getSectors().map(s => `<option>${s}</option>`).join('');
+  if(sel) sel.innerHTML = (typeof ALL_SECTORS!=='undefined'?ALL_SECTORS:getSectors()).map(s => `<option>${s}</option>`).join('');
 }
-
 function startResearch() {
   const name = document.getElementById('rCompany').value.trim();
   const sector = document.getElementById('rSectorInput').value;
@@ -946,13 +929,11 @@ function startResearch() {
   document.getElementById('researchResult').style.display = 'none';
   renderSourceSteps();
 }
-
 function renderSourceSteps() {
   const c = currentResearch.name;
   const done = Object.keys(currentResearch.findings).length;
   document.getElementById('rProgressText').textContent = `${done}/7`;
   document.getElementById('rProgressBar').style.width = Math.round(done/7*100) + '%';
-
   document.getElementById('rSourceSteps').innerHTML = RESEARCH_SOURCES.map((src, i) => {
     const finding = currentResearch.findings[src.id];
     return `<div style="display:flex;align-items:flex-start;gap:12px;background:var(--surface);border-radius:8px;padding:12px 14px;margin-bottom:8px;border:1px solid ${finding?'var(--green-bd)':'var(--border)'}">
@@ -978,12 +959,10 @@ function renderSourceSteps() {
     </div>`;
   }).join('');
 }
-
 function toggleFinding(id) {
   const el = document.getElementById('finding-'+id);
   el.style.display = el.style.display==='none'?'block':'none';
 }
-
 function scoreFinding(srcId, srcIdx) {
   const text = document.getElementById('text-'+srcId).value;
   const src = RESEARCH_SOURCES[srcIdx];
@@ -992,7 +971,6 @@ function scoreFinding(srcId, srcIdx) {
   currentResearch.findings[srcId] = { hint: result.h[0] };
   renderSourceSteps();
 }
-
 function finishResearch() {
   if(!currentResearch) return;
   const sw = parseInt(document.getElementById('rSwitchInput').value);
@@ -1007,7 +985,6 @@ function finishResearch() {
   };
   const existing = suppliers.findIndex(s => s.name.toLowerCase()===entry.name.toLowerCase());
   if(existing>=0) suppliers[existing]=entry; else suppliers.push(entry);
-
   document.getElementById('researchFlow').style.display='none';
   document.getElementById('researchResult').style.display='block';
   const rc = score<4?'#1a7a3c':score<6.5?'#b45a00':'#c0170f';
@@ -1036,7 +1013,6 @@ function finishResearch() {
     </div>`;
   renderDashboard();
 }
-
 function resetResearch() {
   currentResearch = null;
   document.getElementById('researchInputCard').style.display = 'block';
@@ -1044,11 +1020,9 @@ function resetResearch() {
   document.getElementById('researchResult').style.display = 'none';
   document.getElementById('rCompany').value = '';
 }
-
 /* ════════════════════════════════════════════
    SECTOR INTEL
    ════════════════════════════════════════════ */
-
 const SECTOR_CONTEXT = {
   "Safety-Critical": {
     regulatory: [
@@ -1125,7 +1099,7 @@ const SECTOR_CONTEXT = {
       "Wiring harness sole-source risk: what is the re-qualification timeline?"
     ]
   },
-  "Fluids, Filtration & Emissions": {
+  "Chemicals, Oils & Fuels": {
     regulatory: [
       "EPA Clean Air Act (CAA): emissions aftertreatment compliance (SCR, DPF, EGR)",
       "CARB (California Air Resources Board): stricter NOx limits from 2024",
@@ -1141,31 +1115,24 @@ const SECTOR_CONTEXT = {
     ]
   }
 };
-
 let intelChartInstance = null;
-
 function renderSectorIntel(sector) {
   const sectors = getSectors();
-
   // Filter bar
   document.getElementById('intelFilterBar').innerHTML = sectors.map(s =>
     `<button class="f-btn${s===sector?' active':''}" onclick="renderSectorIntel('${s}')">${s}</button>`
   ).join('');
-
   const ss = suppliers.filter(s => s.sector === sector);
   const ctx = SECTOR_CONTEXT[sector] || { regulatory: [], checklist: [] };
-
   // Avg score per criterion for this sector
   const avgScores = CRITERIA.map((_, i) =>
     ss.length ? +(ss.reduce((a,s) => a + s.scores[i], 0) / ss.length).toFixed(1) : 0
   );
-
   // Top 5 criteria by avg score (highest risk first)
   const ranked = avgScores
     .map((avg, i) => ({ label: CRITERIA[i], short: SHORT[i], avg, idx: i }))
     .sort((a, b) => b.avg - a.avg)
     .slice(0, 5);
-
   // Common flags: flags appearing in 2+ suppliers
   const flagCounts = {};
   ss.forEach(s => {
@@ -1177,13 +1144,11 @@ function renderSectorIntel(sector) {
   const commonFlags = Object.entries(flagCounts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
-
   // Score distribution among suppliers
   const low  = ss.filter(s => calcWA(s) < 4).length;
   const mod  = ss.filter(s => calcWA(s) >= 4 && calcWA(s) < 6.5).length;
   const high = ss.filter(s => calcWA(s) >= 6.5).length;
   const avgSector = ss.length ? (ss.reduce((a,s) => a + calcWA(s), 0) / ss.length).toFixed(1) : ', ';
-
   document.getElementById('intelContent').innerHTML = `
     <!-- Sector header -->
     <div class="card" style="border-left:4px solid var(--navy);margin-bottom:14px">
@@ -1208,7 +1173,6 @@ function renderSectorIntel(sector) {
         </div>
       </div>
     </div>
-
     <div class="grid-2">
       <!-- Top 5 criteria risks -->
       <div class="card">
@@ -1231,7 +1195,6 @@ function renderSectorIntel(sector) {
           </div>`;
         }).join('')}
       </div>
-
       <!-- Common flags -->
       <div class="card">
         <div class="card-title">Recurring Themes Across Suppliers</div>
@@ -1245,7 +1208,6 @@ function renderSectorIntel(sector) {
         ${ss.length === 0 ? '<div style="font-size:12px;color:var(--muted);padding:8px">No suppliers scored in this sector yet.</div>' : ''}
       </div>
     </div>
-
     <div class="grid-2">
       <!-- Regulatory context -->
       <div class="card">
@@ -1258,7 +1220,6 @@ function renderSectorIntel(sector) {
           `<div style="font-size:12px;color:var(--muted);padding:8px">Regulatory context will populate as more suppliers are scored in this sector.</div>`
         }
       </div>
-
       <!-- Screening checklist -->
       <div class="card">
         <div class="card-title">New Supplier Screening Checklist</div>
@@ -1272,7 +1233,6 @@ function renderSectorIntel(sector) {
         }
       </div>
     </div>
-
     <!-- Supplier list for this sector -->
     <div class="card">
       <div class="card-title">All Scored Suppliers in ${sector}: ranked by score</div>
@@ -1294,7 +1254,6 @@ function renderSectorIntel(sector) {
     </div>
   `;
 }
-
 /* ════════════════════════════════════════════
    REPORT UPLOAD: PDF / DOCX PARSER
    ════════════════════════════════════════════ */
@@ -1363,12 +1322,10 @@ const SIGNALS = [
     {re:/qualified.*alternative|multiple.*supplier/i,score:3,hint:"Alternatives available"}
   ]}
 ];
-
 function setReportProgress(pct,text){
   document.getElementById('reportProgressBar').style.width=pct+'%';
   document.getElementById('reportProgressText').textContent=text;
 }
-
 async function extractTextFromPDF(arrayBuffer){
   pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   const pdf=await pdfjsLib.getDocument({data:arrayBuffer}).promise;
@@ -1381,12 +1338,10 @@ async function extractTextFromPDF(arrayBuffer){
   }
   return text;
 }
-
 async function extractTextFromDOCX(arrayBuffer){
   const result=await mammoth.extractRawText({arrayBuffer});
   return result.value;
 }
-
 function detectSupplierName(text){
   const patterns=[
     /^([A-Z][A-Za-z\s&,\.]{3,40})\s+sustainability/im,
@@ -1395,7 +1350,6 @@ function detectSupplierName(text){
   for(const re of patterns){const m=text.match(re);if(m)return m[1].trim();}
   return '';
 }
-
 function analyseText(text){
   const suggestedScores=[5,5,5,5,5,5,5,5];
   const results=SIGNALS.map(sig=>{
@@ -1417,7 +1371,6 @@ function analyseText(text){
   const vt=vtM?vtM[0].substring(0,60):'';
   return{suggestedScores,results,sbti,cdp,vt};
 }
-
 async function loadReport(e){
   const file=e.target.files[0];
   if(!file)return;
@@ -1464,7 +1417,6 @@ async function loadReport(e){
   }
   e.target.value='';
 }
-
 function saveReportSupplier(){
   const name=document.getElementById('reportSupplierName').value.trim();
   const sector=document.getElementById('reportSector').value;
@@ -1484,16 +1436,33 @@ function saveReportSupplier(){
   status.style.display='inline-block';status.className='upload-status';
   status.textContent=`${name} ${existing>=0?'updated':'added'} from report`;
 }
-
 function closeReportModal(){
   document.getElementById('reportModal').classList.remove('show');
   document.getElementById('reportProgress').style.display='block';
   setReportProgress(0,'Extracting text.');
 }
 document.getElementById('reportModal').addEventListener('click',e=>{if(e.target===document.getElementById('reportModal'))closeReportModal();});
-
 // Init
 renderDashboard();
+
+// ═══ ESG SCORECARD ═══
+var esgMode='default';
+var SECTOR_FLAGS={"Safety-Critical":{flags:[{c:"Defective Parts",icon:"🛡️",why:"Brake and steering. Defective parts endanger drivers.",lv:"high"},{c:"CO2 Compliance",icon:"💨",why:"Safety systems electrified. Emission standards affect components.",lv:"high"},{c:"Human Rights",icon:"👷",why:"Manufacturing-intensive. Safety failures create liability.",lv:"med"}],tw:["Defective 20%","CO2 20%","Conflict Min 12%"]},"Interiors":{flags:[{c:"Haz Waste",icon:"♻️",why:"Foam and adhesives generate hazardous waste.",lv:"high"},{c:"CO2 Compliance",icon:"💨",why:"Material-intensive manufacturing.",lv:"high"},{c:"Switch Cost",icon:"🔗",why:"Specialized trim suppliers often sole-source.",lv:"med"}],tw:["Haz Waste 22%","CO2 20%","Switch 15%"]},"Tires":{flags:[{c:"Human Rights",icon:"👷",why:"Natural rubber sourcing linked to labor concerns.",lv:"high"},{c:"CO2 Compliance",icon:"💨",why:"Energy-intensive vulcanization.",lv:"high"},{c:"Defective Parts",icon:"🛡️",why:"Tire failures cause accidents.",lv:"med"}],tw:["HR 22%","CO2 20%","Defective 16%"]},"Coatings":{flags:[{c:"Haz Waste",icon:"♻️",why:"Solvents and plastics generate hazardous waste.",lv:"high"},{c:"CO2 Compliance",icon:"💨",why:"Chemical processing is emissions-intensive.",lv:"high"},{c:"Switch Cost",icon:"🔗",why:"Custom formulations with long qualification.",lv:"med"}],tw:["CO2 22%","Haz Waste 20%","Defective 13%"]},"Electronics, Wiring & Sensors":{flags:[{c:"Defective Parts",icon:"🛡️",why:"Controls braking, steering, safety. Falsified data puts vehicles at exposure.",lv:"high"},{c:"Conflict Minerals",icon:"⚠️",why:"3TG in solder, connectors, wiring. SEC requires SD filings.",lv:"high"},{c:"Human Rights",icon:"👷",why:"Global electronics labor. Safety failures cascade into PACCAR accountability.",lv:"med"}],tw:["Defective 18%","Conflict Min 15%","HR 15%","Switch 15%"]},"Chemicals, Oils & Fuels":{flags:[{c:"CO2 Compliance",icon:"💨",why:"Emission suppliers' CAA violations cascade into PACCAR's compliance.",lv:"high"},{c:"Haz Waste",icon:"♻️",why:"Lead, RCRA violations, Superfund. Cleanup $12M-$40M per site.",lv:"high"},{c:"ESG Disclosure",icon:"👁️",why:"Zero-rated suppliers block Scope 3 reporting.",lv:"med"}],tw:["CO2 22%","Haz Waste 18%","Defective 13%","Switch 12%"]},"Powertrain":{flags:[{c:"CO2 Compliance",icon:"💨",why:"Engine components affect vehicle emissions compliance.",lv:"high"},{c:"Defective Parts",icon:"🛡️",why:"Powertrain failures cause breakdowns.",lv:"high"},{c:"Switch Cost",icon:"🔗",why:"Named in PACCAR 10-K as critical dependency.",lv:"med"}],tw:["CO2 18%","Defective 18%","Switch 14%"]},"Metals & Chassis":{flags:[{c:"CO2 Compliance",icon:"💨",why:"Steel/aluminum is the most carbon-intensive input.",lv:"high"},{c:"Haz Waste",icon:"♻️",why:"Foundry waste and plating chemicals.",lv:"high"},{c:"Defective Parts",icon:"🛡️",why:"Chassis integrity affects vehicle safety.",lv:"med"}],tw:["CO2 18%","Haz Waste 16%","Defective 16%"]}};
+function esgInit(){var s=document.getElementById('esgSec');if(s)s.innerHTML=ALL_SECTORS.map(function(x){return '<option>'+x+'</option>';}).join('');esgOnSectorChange();renderYR();}
+function esgOnSectorChange(){var sec=document.getElementById('esgSec').value;var info=SECTOR_FLAGS[sec];var el=document.getElementById('esgSectorFlags');if(!info||!el){if(el)el.innerHTML='';esgBuildGrid(sec);return;}var h='<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px"><div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:8px;font-family:Barlow Condensed,sans-serif;text-transform:uppercase;letter-spacing:0.5px">Key Flags: '+sec+'</div><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">';info.flags.forEach(function(f){var bg=f.lv==='high'?'var(--red-bg)':'var(--amber-bg)';var bd=f.lv==='high'?'var(--red-bd)':'var(--amber-bd)';var cl=f.lv==='high'?'var(--red)':'var(--amber)';h+='<div style="background:'+bg+';border:1px solid '+bd+';border-radius:8px;padding:8px 12px;flex:1;min-width:180px"><div style="font-size:11px;font-weight:700;color:'+cl+'">'+f.icon+' '+f.c+'</div><div style="font-size:9px;color:var(--muted);margin-top:3px">'+f.why+'</div></div>';});h+='</div><div style="display:flex;gap:6px;flex-wrap:wrap">';info.tw.forEach(function(w){h+='<span style="background:var(--blue-dim);border:1px solid var(--blue-border);border-radius:4px;padding:3px 8px;font-size:9px;color:var(--navy);font-weight:700">'+w+'</span>';});h+='</div></div>';el.innerHTML=h;esgBuildGrid(sec);}
+function esgToggleMode(){esgMode=esgMode==='default'?'custom':'default';var b=document.getElementById('esgModeBtn');if(b){b.textContent=esgMode==='default'?'Customize Weights':'Use Default Weights';b.className=esgMode==='default'?'btn btn-sm btn-outline':'btn btn-sm btn-blue';}document.getElementById('esgWeightGuide').style.display=esgMode==='custom'?'block':'none';esgBuildGrid();}
+function esgBuildGrid(sec){if(!sec)sec=document.getElementById('esgSec').value;var w=WEIGHTS[sec]||DEFAULT_W;var SRC=['Violation Tracker, CDP, MSCI','OSHA, NLRB records','EPA ECHO, RCRA data','CDP, SBTi reports','SEC EDGAR, CMRT filings','EPA CAA, SBTi, CDP','NHTSA recalls, quality audits','Supply chain dependency'];var ASSUME=['Penalty history and ESG coverage','OSHA enforcement and labor cases','EPA compliance and hazwaste','Climate scores and SBTi status','SD filings and 3TG traceability','CAA violations and emission targets','Recalls and data integrity','Alternatives and qualification time'];var g=document.getElementById('esgGrid');if(!g)return;var info=SECTOR_FLAGS[sec];var fc={};if(info)info.flags.forEach(function(f){fc[f.c]=f.lv;});g.innerHTML=CRITERIA.map(function(c,i){var fl=fc[c];var bdr=fl==='high'?'var(--red-bd)':fl?'var(--amber-bd)':'var(--border)';var bg=fl==='high'?'var(--red-bg)':fl?'var(--amber-bg)':'var(--surface)';var wv=Math.round(w[i]*100);var wH=esgMode==='custom'?'<input type="number" id="esgCW'+i+'" value="'+wv+'" min="0" max="100" step="1" style="width:42px;padding:3px;border-radius:4px;border:1px solid var(--navy);font-size:10px;text-align:center;color:var(--navy);font-weight:700" oninput="esgChkT()"><span style="font-size:8px;color:var(--dim)">%</span>':'<div style="background:var(--blue-dim);border:1px solid var(--blue-border);border-radius:4px;padding:3px 8px;font-size:10px;color:var(--navy);font-weight:700">'+wv+'%</div>';return '<div style="background:'+bg+';border-radius:8px;padding:12px;border:1px solid '+bdr+'"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><div style="font-size:10px;font-weight:700;color:var(--text)">'+c+'</div>'+(fl?'<div style="font-size:8px;font-weight:700;color:'+(fl==='high'?'var(--red)':'var(--amber)')+'">FLAG</div>':'')+'</div><div style="font-size:7px;color:var(--dim);margin-bottom:5px">'+SRC[i]+'</div><div style="display:flex;align-items:center;gap:8px"><input type="number" id="esgV'+i+'" value="5" min="1" max="10" step="1" style="width:55px;padding:6px;border-radius:5px;border:1px solid var(--border);font-size:14px;text-align:center;color:var(--navy);font-weight:800;background:#fff">'+wH+'</div>'+(esgMode==='custom'?'<div style="font-size:7px;color:var(--dim);margin-top:3px">Basis: '+ASSUME[i]+'</div>':'')+'</div>';}).join('');if(esgMode==='custom')esgChkT();}
+function esgChkT(){var t=0;for(var i=0;i<8;i++)t+=parseInt(document.getElementById('esgCW'+i).value)||0;var e=document.getElementById('esgCWTotal');if(e){e.textContent=t+'%';e.style.color=t===100?'var(--navy)':'var(--red)';}}
+function esgPrefill(){var n=(document.getElementById('esgName').value||'').trim().toLowerCase();if(!n){alert('Enter a company name first.');return;}var f=null;for(var i=0;i<suppliers.length;i++){if(suppliers[i].name.toLowerCase().indexOf(n)>=0){f=suppliers[i];break;}}if(!f){alert('"'+n+'" not found. Score manually.');return;}document.getElementById('esgName').value=f.name;document.getElementById('esgSec').value=f.sector;esgOnSectorChange();for(var i=0;i<8;i++)document.getElementById('esgV'+i).value=f.scores[i];alert('Loaded: '+f.name);}
+function esgClear(){document.getElementById('esgName').value='';for(var i=0;i<8;i++)document.getElementById('esgV'+i).value=5;document.getElementById('esgOut').style.display='none';}
+function esgClearAll(){if(!customSuppliers.length)return;if(!confirm('Clear all '+customSuppliers.length+' researched companies?'))return;customSuppliers=[];renderYR();}
+function esgCalc(){var nm=(document.getElementById('esgName').value||'').trim();if(!nm){alert('Enter a company name.');return;}var sec=document.getElementById('esgSec').value;var w;if(esgMode==='custom'){w=[];var tW=0;for(var i=0;i<8;i++){var wv=(parseInt(document.getElementById('esgCW'+i).value)||0)/100;w.push(wv);tW+=Math.round(wv*100);}if(tW!==100){alert('Weights must total 100%. Currently: '+tW+'%');return;}}else{w=WEIGHTS[sec]||DEFAULT_W;}var sc=[],wa=0;for(var i=0;i<8;i++){var v=Math.min(10,Math.max(1,parseInt(document.getElementById('esgV'+i).value)||5));sc.push(v);wa+=v*w[i];}wa=+wa.toFixed(2);var risk=wa<4?'LOW':wa<6.5?'MODERATE':'HIGH';var tier=wa<4?1:wa<6.5?2:3;var rc=wa<4?'#1a7a3c':wa<6.5?'#b45a00':'#c0170f';var rBg=wa<4?'var(--green-bg)':wa<6.5?'var(--amber-bg)':'var(--red-bg)';var rBd=wa<4?'var(--green-bd)':wa<6.5?'var(--amber-bd)':'var(--red-bd)';var SRC=['Violation Tracker, CDP, MSCI','OSHA, NLRB records','EPA ECHO, RCRA data','CDP, SBTi reports','SEC EDGAR, CMRT filings','EPA CAA, SBTi, CDP','NHTSA recalls, quality audits','Supply chain dependency'];var rows='';for(var i=0;i<8;i++){var v=sc[i],wt=w[i],ws=+(v*wt).toFixed(2);var cl=v<=3?'#1a7a3c':v<=6?'#b45a00':'#c0170f';rows+='<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 12px;font-size:11px;font-weight:600">'+CRITERIA[i]+'</td><td style="padding:8px;text-align:center;font-size:15px;font-weight:800;color:'+cl+'">'+v+'</td><td style="padding:8px;text-align:center;font-size:11px;color:var(--navy);font-weight:700">'+Math.round(wt*100)+'%</td><td style="padding:8px;text-align:center;font-size:12px;font-weight:700;color:'+cl+'">'+ws+'</td><td style="padding:8px;font-size:9px;color:var(--dim)">'+SRC[i]+'</td></tr>';}var fl=[];for(var i=0;i<8;i++){if(sc[i]>=7)fl.push(CRITERIA[i]+': '+sc[i]+'/10');}var flagH=fl.length?'<div style="background:var(--red-bg);border:1px solid var(--red-bd);border-radius:8px;padding:12px 14px;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:4px">Anomaly Flags</div>'+fl.map(function(f){return '<div style="font-size:11px;color:var(--red)">'+String.fromCharCode(8226)+' '+f+'</div>';}).join('')+'</div>':'<div style="background:var(--green-bg);border:1px solid var(--green-bd);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:11px;color:var(--green);font-weight:600">No anomaly flags.</div>';var interp=wa<3?'Minimal sustainability concerns. Standard annual monitoring.':wa<4?'Low exposure. Minor areas may need attention.':wa<5?'Moderate exposure. Some criteria warrant closer review.':wa<6.5?'Elevated exposure. Active monitoring recommended.':wa<8?'High exposure. Quarterly review and mitigation required.':'Critical. Immediate escalation required.';var mon=tier===3?'Quarterly review. Develop mitigation plan.':tier===2?'Semi-annual monitoring.':'Annual assessment.';var o=document.getElementById('esgOut');o.style.display='block';o.innerHTML='<div class="card" style="border-top:4px solid '+rc+'"><div class="card-title">ESG Scorecard: '+nm+'</div><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px"><div><div style="font-size:12px;color:var(--muted)">Sector: <strong style="color:var(--navy)">'+sec+'</strong></div><div style="font-size:10px;color:var(--dim);margin-top:2px">'+(esgMode==='custom'?'Custom weights':'Sector weights')+'</div></div><div style="display:flex;gap:14px;align-items:center"><div style="text-align:center;background:var(--surface);padding:14px 24px;border-radius:10px;border:1px solid var(--border)"><div style="font-size:38px;font-weight:900;color:'+rc+'">'+wa+'</div><div style="font-size:10px;color:var(--muted)">Weighted Avg</div></div><div style="text-align:center;background:var(--surface);padding:14px 20px;border-radius:10px;border:1px solid var(--border)"><div style="font-size:24px;font-weight:900;color:'+rc+'">TIER '+tier+'</div><div style="font-size:10px;color:var(--muted)">'+risk+'</div></div></div></div><div style="background:'+rBg+';border:1px solid '+rBd+';border-radius:8px;padding:12px 14px;margin-bottom:16px"><div style="font-size:11px;font-weight:700;color:'+rc+';margin-bottom:4px">Interpretation</div><div style="font-size:11px;color:var(--text)">'+interp+'</div></div><table style="width:100%;border-collapse:collapse;margin-bottom:14px"><tr style="background:var(--surface)"><th style="padding:8px 12px;text-align:left;font-size:10px;color:var(--muted);font-weight:700">Criterion</th><th style="padding:8px;text-align:center;font-size:10px;color:var(--muted);font-weight:700">Score</th><th style="padding:8px;text-align:center;font-size:10px;color:var(--muted);font-weight:700">Weight</th><th style="padding:8px;text-align:center;font-size:10px;color:var(--muted);font-weight:700">Weighted</th><th style="padding:8px;font-size:10px;color:var(--muted);font-weight:700">Source</th></tr>'+rows+'<tr style="background:var(--surface)"><td style="padding:10px 12px;font-size:12px;font-weight:800;color:var(--navy)">TOTAL</td><td></td><td style="text-align:center;font-size:11px;font-weight:700;color:var(--navy)">100%</td><td style="text-align:center;font-size:15px;font-weight:900;color:'+rc+'">'+wa+'</td><td></td></tr></table>'+flagH+'<div style="background:var(--surface);border-radius:8px;padding:12px 14px;margin-bottom:14px;border:1px solid var(--border)"><div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:4px">Monitoring</div><div style="font-size:11px;color:var(--muted)">'+mon+'</div></div><div style="display:flex;gap:8px"><button class="btn btn-blue" onclick="esgSave()">Save to Dashboard</button></div></div>';window._esg={name:nm,sector:sec,scores:sc,weights:w,wa:wa,risk:risk};o.scrollIntoView({behavior:'smooth'});}
+function esgSave(){var d=window._esg;if(!d)return;var e={name:d.name,sector:d.sector,scores:d.scores.slice(),score:d.wa,risk:d.risk,sbti:'',vt:'',flag:'',action:'ESG Scorecard'};var x=suppliers.findIndex(function(s){return s.name.toLowerCase()===d.name.toLowerCase();});if(x>=0)suppliers[x]=e;else suppliers.push(e);var cx=customSuppliers.findIndex(function(s){return s.name.toLowerCase()===d.name.toLowerCase();});if(cx>=0)customSuppliers[cx]=e;else customSuppliers.push(e);renderDashboard();renderYR();document.getElementById('esgName').value='';for(var i=0;i<8;i++)document.getElementById('esgV'+i).value=5;document.getElementById('esgOut').style.display='none';document.getElementById('esgYourResearch').scrollIntoView({behavior:'smooth'});}
+// ═══ YOUR RESEARCH SECTION ═══
+var yrC={};
+function dYR(id){if(yrC[id]){yrC[id].destroy();delete yrC[id];}}
+function renderYR(){var p=document.getElementById('esgYourResearch');if(!p)return;if(!customSuppliers.length){p.style.display='none';return;}p.style.display='block';document.getElementById('esgYRCount').textContent='('+customSuppliers.length+' companies)';var th='<table style="width:100%;border-collapse:collapse;font-size:11px"><tr style="background:var(--surface)"><th style="padding:8px 10px;text-align:left;font-weight:700;color:var(--muted)">Company</th><th style="padding:8px;text-align:left;font-weight:700;color:var(--muted)">Sector</th>';SHORT.forEach(function(s){th+='<th style="padding:8px;text-align:center;font-weight:700;color:var(--muted)">'+s+'</th>';});th+='<th style="padding:8px;text-align:center;font-weight:700;color:var(--muted)">WA</th><th style="padding:8px;text-align:center;font-weight:700;color:var(--muted)">Tier</th></tr>';customSuppliers.forEach(function(s){var wa=s.score||calcWA(s);var tier=wa<4?1:wa<6.5?2:3;var rc=wa<4?'#1a7a3c':wa<6.5?'#b45a00':'#c0170f';th+='<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px;font-weight:600">'+s.name+'</td><td style="padding:8px;color:var(--muted);font-size:10px">'+s.sector+'</td>';s.scores.forEach(function(v){var cl=v<=3?'#1a7a3c':v<=6?'#b45a00':'#c0170f';th+='<td style="padding:8px;text-align:center;font-weight:700;color:'+cl+'">'+v+'</td>';});th+='<td style="padding:8px;text-align:center;font-weight:800;color:'+rc+'">'+wa+'</td><td style="padding:8px;text-align:center"><span style="background:'+(tier===1?'var(--green-bg)':tier===3?'var(--red-bg)':'var(--amber-bg)')+';color:'+(tier===1?'var(--green)':tier===3?'var(--red)':'var(--amber)')+';padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700">T'+tier+'</span></td></tr>';});th+='</table>';document.getElementById('esgYRTable').innerHTML=th;dYR('bar');var labels=customSuppliers.map(function(s){return s.name.length>15?s.name.substring(0,13)+'..':s.name;});var scores=customSuppliers.map(function(s){return s.score||calcWA(s);});var colors=scores.map(function(v){return v<4?'#1a7a3c':v<6.5?'#b45a00':'#c0170f';});yrC.bar=new Chart(document.getElementById('esgYRBar'),{type:'bar',data:{labels:labels,datasets:[{label:'WA Score',data:scores,backgroundColor:colors,borderRadius:4,barThickness:customSuppliers.length>8?16:28}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#5a6a8a'},max:10},x:{grid:{display:false},ticks:{color:'#1a2340',font:{weight:600}}}},plugins:{legend:{display:false}}}});dYR('tier');var t1=customSuppliers.filter(function(s){return (s.score||calcWA(s))<4;}).length;var t2=customSuppliers.filter(function(s){var w=s.score||calcWA(s);return w>=4&&w<6.5;}).length;var t3=customSuppliers.filter(function(s){return (s.score||calcWA(s))>=6.5;}).length;yrC.tier=new Chart(document.getElementById('esgYRTier'),{type:'doughnut',data:{labels:['Tier 1 (Low)','Tier 2 (Moderate)','Tier 3 (High)'],datasets:[{data:[t1,t2,t3],backgroundColor:['#1a7a3c','#b45a00','#c0170f'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom',labels:{color:'#5a6a8a',font:{size:11}}}}}});dYR('radar');var rc2=['#2A7EE5','#c0170f','#1a7a3c','#b45a00','#7b1fa2','#00838f','#e65100','#4a148c'];var ds=customSuppliers.map(function(s,idx){var cl=rc2[idx%rc2.length];return{label:s.name,data:s.scores,borderColor:cl,backgroundColor:cl+'22',borderWidth:2,pointRadius:4,pointBackgroundColor:cl};});yrC.radar=new Chart(document.getElementById('esgYRRadar'),{type:'radar',data:{labels:SHORT,datasets:ds},options:{responsive:true,maintainAspectRatio:false,scales:{r:{grid:{color:'rgba(0,0,0,0.06)'},angleLines:{color:'rgba(0,0,0,0.06)'},ticks:{display:false},min:0,max:10,pointLabels:{color:'#5a6a8a',font:{size:11,weight:600}}}},plugins:{legend:{position:'bottom',labels:{color:'#5a6a8a',font:{size:10}}}}}});}
+
 </script>
 </body>
 </html>
